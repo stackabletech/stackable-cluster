@@ -1,0 +1,40 @@
+---
+apiVersion: hbase.stackable.tech/v1alpha1
+kind: HbaseCluster
+metadata:
+  name: simple
+spec:
+  version: 2.4.6
+  hdfsReference:
+    namespace: default
+    name: simple
+    root: /hbase
+  zookeeperReference:
+    namespace: default
+    name: simple
+  masters:
+    roleGroups:
+      default:
+        selector:
+          matchExpressions:
+            - key: stackable/role
+              operator: In
+              values:
+                - master-role-1
+                - master-role-3
+        replicas: 2
+        config:
+          javaHome: /usr/lib/jvm/java-1.11.0-openjdk-amd64/
+          masterWebUiPort: 17000
+          metricsPort: 7077
+  regionServers:
+    roleGroups:
+      default:
+        selector:
+          matchLabels:
+            stackable/role: worker-role
+        replicas: 3
+        config:
+          javaHome: /usr/lib/jvm/java-1.11.0-openjdk-amd64/
+          regionServerWebUiPort: 17001
+          metricsPort: 7078

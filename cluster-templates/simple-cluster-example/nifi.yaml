@@ -1,0 +1,26 @@
+---
+apiVersion: nifi.stackable.tech/v1alpha1
+kind: NifiCluster
+metadata:
+  name: simple
+spec:
+  metricsPort: 8428
+  version: "1.13.2"
+  zookeeperReference:
+    name: simple
+    namespace: default
+    chroot: /nifi
+  nodes:
+    roleGroups:
+      default:
+        selector:
+          matchExpressions:
+            - key: stackable/role
+              operator: In
+              values:
+                - stream-role
+        replicas: 3
+        config:
+          httpPort: 10000
+          protocolPort: 10443
+          loadBalancePort: 6342
