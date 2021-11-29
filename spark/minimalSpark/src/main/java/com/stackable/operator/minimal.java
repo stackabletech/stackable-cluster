@@ -1,13 +1,19 @@
 package com.stackable.operator;
 
-import org.apache.spark.api.java.JavaSparkContext;
+
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.SparkSession;
 
 public class minimal {
-    JavaSparkContext sparkContext = new JavaSparkContext(conf);
 
+    public static void main(String[] args) {
+        String logFile = "resources/minimalSpark.txt";
+        SparkSession spark = SparkSession.builder().appName("minimal").getOrCreate();
+        //JavaSparkContext sparkContext = new JavaSparkContext(conf);
+        Dataset<String> logData = spark.read().textFile(logFile).cache();
 
+        logData.show();
+        logData.write().save("/tmp/stackySaysHello.txt");
 
-
-
+    }
 }
