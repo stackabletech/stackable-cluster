@@ -8,6 +8,6 @@ SPARK_MASTER_IP=$(hostname -i | cut -d' ' -f2)
   --class com.stackable.operator.minimal \
   --master spark://${SPARK_MASTER_IP}:7078 \
   --deploy-mode client \
-  --num-executors 1 \
+  --num-executors 2 \
   --executor-memory 1g \
   /tmp/minimalSpark-all.jar
