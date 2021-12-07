@@ -17,7 +17,7 @@ kubectl cp ~/Repo/stackable/stackable-cluster/scripts/spark-submit.sh $SPARK_MAS
 kubectl cp ~/Repo/stackable/stackable-cluster/spark/minimalSpark/build/resources/main/minimalSpark.txt $SPARK_MASTER_POD:/tmp
 kubectl cp ~/Repo/stackable/stackable-cluster/spark/minimalSpark/build/resources/main/minimalSpark.txt $SPARK_SLAVE_POD:/tmp
 
-#enter pod and start bash
+#make submit executable
 kubectl exec --stdin --tty $SPARK_MASTER_POD -- /bin/bash -c "chmod 700 /tmp/spark-submit.sh"
 
 #enter pod
