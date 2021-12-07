@@ -7,11 +7,16 @@ import org.apache.spark.sql.SparkSession;
 public class minimal {
 
     public static void main(String[] args) {
+
         String logFile = "/tmp/minimalSpark.txt";
+
+        // create spark session
         SparkSession spark = SparkSession.builder().appName("minimal").getOrCreate();
-        //JavaSparkContext sparkContext = new JavaSparkContext(conf);
+
+        // read some file
         Dataset<String> logData = spark.read().textFile(logFile).cache();
 
+        // print and save data
         logData.show(false);
         logData.write().save("/tmp/StackyMcStackfaceSaysHello.txt");
 
