@@ -1,0 +1,4 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+commands:
+  - command: kubectl assert exist-enhanced deployment simple -n $NAMESPACE --field-selector status.readyReplicas=1

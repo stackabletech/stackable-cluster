@@ -1,15 +1,8 @@
 #!/bin/bash
 
-set -x
+# prerequisites: krew needs to be installed. https://krew.sigs.k8s.io/docs/user-guide/setup/install/
+# on mac OS:
+brew install krew
 
-# create array Kind Cluster
-kind create cluster --config=kind/kindConfig.yaml
-
-# add Helm repo
-helm repo add stackable-dev https://repo.stackable.tech/repository/helm-dev
-
-# install the spark operator
-helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-mr216" --install
-
-# create a simple spark cluster
-kubectl create -f kind/spark.yaml
+# install kuttl: https://github.com/kudobuilder/kuttl
+kubectl krew install kuttl
