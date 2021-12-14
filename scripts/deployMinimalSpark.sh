@@ -2,6 +2,13 @@
 
 set -x
 
+#TODO create check if KIND cluster already exists or needs to be created.
+kind create cluster --config=kind/kindConfig.yaml
+
+#TODO check if neccessary operator is installed + if repo is added
+#helm repo add stackable-dev https://repo.stackable.tech/repository/helm-dev
+helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-mr216" --install
+
 #get master pod name
 export SPARK_MASTER_POD=$(kubectl get pods -o=name | grep master | sed "s/^.\{4\}//")
 export SPARK_SLAVE_POD=$(kubectl get pods -o=name | grep slave | sed "s/^.\{4\}//")
