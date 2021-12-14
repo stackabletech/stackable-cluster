@@ -38,6 +38,4 @@ gen
 #!.idea
 #!.run
 
-
-
-
+/kubeconfig

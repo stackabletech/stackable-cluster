@@ -1,0 +1,9 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestSuite
+startKIND: true
+kindConfig: kind.yaml
+kindContext: stkbl-cntxt
+skipClusterDelete: false
+testDirs:
+  - kuttl-test/tests/
+#parallel: 4
