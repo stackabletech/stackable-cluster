@@ -1,0 +1,60 @@
+---
+apiVersion: t2.stackable.tech/v1
+kind: Infra
+template: hcloud-debian-10
+metadata:
+  name: spark-production-layout
+  description: "Cluster for Spark Operator (Hetzner Cloud / Debian 10)"
+domain: stackable.test
+publicKeys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIPbNsPlxUi3zjlrZYkYDgbTxnD4oBDDC0Ep49i2wq+S Simon@SimonMac.fritz.box"
+spec:
+  location: "hel1"
+  wireguard: false
+  versions:
+    stackable-spark-operator: "RELEASE"
+  nodes:
+    main:
+      numberOfNodes: 2
+services:
+  spark-primary: |
+    apiVersion: spark.stackable.tech/v1alpha1
+    kind: SparkCluster
+    metadata:
+      name: simple
+    spec:
+      version: "3.0.1"
+      config:
+        logDir: "file:///tmp"
+        enableMonitoring: true
+      masters:
+        roleGroups:
+          default:
+            selector:
+              matchLabels:
+                kubernetes.io/arch: stackable-linux
+            replicas: 1
+            config:
+              masterPort: 7078
+              masterWebUiPort: 8081
+      workers:
+        roleGroups:
+          2core2g:
+            selector:
+              matchLabels:
+                kubernetes.io/arch: stackable-linux
+            replicas: 1
+            config:
+              cores: 2
+              memory: "2g"
+              workerPort: 3031
+              workerWebUiPort: 8083
+      historyServers:
+        roleGroups:
+          default:
+            selector:
+              matchLabels:
+                kubernetes.io/arch: stackable-linux
+            replicas: 1
+            config:
+              historyWebUiPort: 18081
