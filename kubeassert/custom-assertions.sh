@@ -6,13 +6,15 @@ function sparkFileExists {
     # Print assertion message
     logger::assert "File with name $1 should be on path."
     # Run some kubectl commands
-    kubectl config get-clusters
+
+    export $SPARK_FILE=$(kubectl exec --stdin --tty $SPARK_MASTER_POD -- /bin/bash -c "cd /tmp/ && -f \"$FILE_NAME\"")
+
     # Validate results
-    if cat $HOME/.kubeassert/result.txt | grep -q ^$1$; then
-      # Print normal logs
-      logger::info "Found $1 in kubeconfig."
+    if [ -f "$SPARK_FILE" == $1 ]; then
+        echo "$SPARK_FILE exists."
+        logger::info "Found $SPARK_FILE in $SPARK_MASTER_POD"
     else
       # Print failure message
-      logger::fail "$1 not found."
+        logger::fail  "$SPARK_FILE does not exist on $SPARK_MASTER_POD."
     fi
 }
