@@ -1,9 +1,0 @@
-apiVersion: kuttl.dev/v1beta1
-kind: TestStep
-commands:
-  - command: helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-mr216" --install
-  - command: pwd #used for debugging
-  - command: ls -al #used for debugging
-  - script: kubectl apply -f spark.yaml --wait
-  - command: sleep 25 #used for debugging
-  - script: kubectl get pods -o=name #used for debugging
