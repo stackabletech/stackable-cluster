@@ -7,3 +7,6 @@ brew install krew
 # install kuttl: https://github.com/kudobuilder/kuttl
 # https://www.cncf.io/wp-content/uploads/2020/08/2020-KUTTL-cncf.pdf
 kubectl krew install kuttl
+
+
+kubectl krew install assert

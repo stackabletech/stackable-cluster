@@ -28,4 +28,4 @@ kubectl cp ~/Repo/stackable/stackable-cluster/spark/minimalSpark/build/resources
 kubectl exec --stdin --tty $SPARK_MASTER_POD -- /bin/bash -c "chmod 700 /tmp/spark-submit.sh"
 
 #enter pod
-  kubectl exec --stdin --tty $SPARK_MASTER_POD -- /bin/bash
+kubectl exec --stdin --tty $SPARK_MASTER_POD -- /bin/bash
