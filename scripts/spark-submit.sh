@@ -10,5 +10,6 @@ SPARK_MASTER_IP=$(hostname -i | cut -d' ' -f2)
   --deploy-mode client \
   --num-executors 2 \
   --executor-memory 1g \
-#  --spark.yarn.submit.waitAppCompletion=false \
   /tmp/minimalSpark.jar
+
+exit 0

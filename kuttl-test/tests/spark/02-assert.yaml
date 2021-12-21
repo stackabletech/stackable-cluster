@@ -2,7 +2,7 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 commands:
   - script: ./kuttl-test/tests/spark/sparkAssertion.sh
+    timeout: 140
   - command: kubectl get pods -o wide
   - command: pwd
-  - command: ./kubectl-assert spark_file_exist StackyMcStackfaceSaysHello.txt -v
-timeout: 10
+  - command: ./kubectl-assert spark_file_exist StackyMcStackfaceSaysHello -v
