@@ -21,11 +21,4 @@ kubectl cp $HOME/Repo/stackable/stackable-cluster/spark/minimalSpark/build/resou
 
 #make submit executable
 kubectl exec --stdin $SPARK_MASTER_POD -- /bin/bash -c "chmod 700 /tmp/spark-submit.sh"
-kubectl exec $SPARK_MASTER_POD -- /bin/bash -x -v -c /tmp/spark-submit.sh
-
-
-echo $SPARK_MASTER_POD
-echo $SPARK_SLAVE_POD
-
-#kubectl assert exist-enhanced deployment ${SPARK_MASTER_POD} -n $NAMESPACE --field-selector status.readyReplicas=1
-#kubectl assert exist-enhanced deployment spark-operator-deployment -n $NAMESPACE --field-selector status.readyReplicas=1
+kubectl exec $SPARK_MASTER_POD -- /bin/bash -x -v -c /tmp/spark-submit.sh &> spark-log.txt

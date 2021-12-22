@@ -15,8 +15,6 @@ function spark_file_exist {
     export SPARK_MASTER_POD=$(kubectl get pods -o=name | grep master | sed "s/^.\{4\}//")
     echo $SPARK_MASTER_POD
 
-    #export $SPARK_FILE=$(kubectl exec --stdin --tty $SPARK_MASTER_POD -- /bin/bash -c "cd /tmp/ && -f \"$FILE_NAME\"")
-    #export SPARK_FILE=$(kubectl exec $SPARK_MASTER_POD -- /bin/bash -x -c "[[ -d /tmp/StackyMcStackfaceSaysHello ]] && echo "StackyMcStackfaceSaysHello" || echo "File does not exist"")
     export SPARK_FILE=$(kubectl exec $SPARK_MASTER_POD -- ls /tmp/ | grep StackyMcStackfaceSaysHello | sed "s/^.\{0\}//" )
     echo $SPARK_FILE
 

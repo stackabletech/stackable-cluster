@@ -39,3 +39,4 @@ gen
 #!.run
 
 /kubeconfig
+spark-log.txt

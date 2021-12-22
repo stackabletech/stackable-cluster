@@ -11,9 +11,7 @@ commands:
   - command: kubectl get pods -o wide
   - command: kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=slave --timeout=5m
   - command: kubectl get pods -o wide
-  #- command: pwd
-  #- command: ls -al
-  #- command: kubectl apply -f ./kuttl-test/tests/spark/00-pod.yaml --wait
+
 startKIND: true
 #namespace: stkbl-namespace
 kindConfig: kind.yaml

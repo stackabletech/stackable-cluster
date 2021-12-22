@@ -11,5 +11,3 @@ SPARK_MASTER_IP=$(hostname -i | cut -d' ' -f2)
   --num-executors 2 \
   --executor-memory 1g \
   /tmp/minimalSpark.jar
-
-exit 0
