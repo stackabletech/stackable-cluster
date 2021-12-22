@@ -2,6 +2,7 @@ package com.stackable.operator;
 
 
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 
 public class minimal {
@@ -18,7 +19,10 @@ public class minimal {
 
         // print and save data
         logData.show(false);
-        logData.write().save("/tmp/StackyMcStackfaceSaysHello.txt");
+        logData.write()
+                .format("text")
+                .mode(SaveMode.Overwrite)
+                .save("/tmp/StackyMcStackfaceSaysHello/");
 
     }
 }
