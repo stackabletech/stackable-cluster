@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id "idea"
+    id 'application'
+    id "com.github.johnrengelman.shadow" version "7.1.0"
+}
+
+application {
+    mainClass = "com.stackable.operator.minimal"
+}
+
+//https://stackoverflow.com/questions/24724383/add-resources-config-files-to-your-jar-using-gradle
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.spark:spark-core_2.13:3.2.0'
+    compileOnly 'org.apache.spark:spark-sql_2.13:3.2.0'
+    compileOnly 'org.apache.spark:spark-mllib_2.13:3.2.0'
+
+
+}
