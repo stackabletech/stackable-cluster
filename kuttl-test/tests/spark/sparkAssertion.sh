@@ -13,7 +13,9 @@ echo $SPARK_SLAVE_POD
 #.jar needs to be distributed to pods
 JAR_FILE="${REPO_DIR}/minimalSpark/build/libs/minimalSpark.jar"
 if [ ! -f ${JAR_FILE} ]; then
+    pushd ${REPO_DIR}
     gradle build
+    popd
 fi
 
 kubectl cp ${JAR_FILE} $SPARK_MASTER_POD:/tmp
