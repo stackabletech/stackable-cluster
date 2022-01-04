@@ -1,11 +1,7 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
-commands:
-  - command: helm repo add stackable-dev https://repo.stackable.tech/repository/helm-dev
-  - command: helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-nightly" --install
-
-startKIND: false
-skipClusterDelete: true
+startKIND: true
+skipClusterDelete: false
 skipDelete: true
 namespace: default
 kindConfig: kind.yaml
@@ -14,4 +10,4 @@ artifactsDir: ./kuttl-test/artifacts/
 testDirs:
   - kuttl-test/tests/
 parallel: 1
-timeout: 120
+timeout: 180

@@ -1,14 +1,7 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: simple-slave-2core2g
-status:
-  readyReplicas: 1
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: simple-master-default
+  name: spark-operator-deployment
 status:
   readyReplicas: 1
 

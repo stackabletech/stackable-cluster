@@ -1,40 +1,5 @@
-apiVersion: spark.stackable.tech/v1alpha1
-kind: SparkCluster
-metadata:
-  name: simple
-spec:
-  version: "3.0.1"
-  config:
-    logDir: /stackable/data/log
-    enableMonitoring: true
-  masters:
-    roleGroups:
-      default:
-        selector:
-          matchLabels:
-            kubernetes.io/os: linux
-        replicas: 1
-        config:
-          masterPort: 7078
-          masterWebUiPort: 8081
-  workers:
-    roleGroups:
-      2core2g:
-        selector:
-          matchLabels:
-            kubernetes.io/os: linux
-        replicas: 1
-        config:
-          cores: 2
-          memory: "2g"
-          workerPort: 3031
-          workerWebUiPort: 8083
-  historyServers:
-    roleGroups:
-      default:
-        selector:
-          matchLabels:
-            kubernetes.io/os: linux
-        replicas: 1
-        config:
-          historyWebUiPort: 18081
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: helm repo add stackable-dev https://repo.stackable.tech/repository/helm-dev
+  - command: helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-nightly" --install
