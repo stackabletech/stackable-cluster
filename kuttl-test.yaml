@@ -1,25 +1,13 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
-commands:
-  - command: helm repo add stackable-dev https://repo.stackable.tech/repository/helm-dev
-  - command: helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-mr216" --install
-  - command: kubectl apply -f ./kuttl-test/crddirs/00-spark-operator.yaml
-  - command: kubectl wait --timeout=5m --for=condition=available deployment spark-operator-deployment
-  - command: kubectl rollout status deployment spark-operator-deployment
-  - command: kubectl get pods -o wide
-  - command: kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=master --timeout=5m
-  - command: kubectl get pods -o wide
-  - command: kubectl wait --for=condition=ready pod -l app.kubernetes.io/component=slave --timeout=5m
-  - command: kubectl get pods -o wide
-
 startKIND: true
-#namespace: stkbl-namespace
+skipClusterDelete: false
+skipDelete: true
+namespace: default
 kindConfig: kind.yaml
 kindContext: stkbl-cntxt
-skipClusterDelete: true
 artifactsDir: ./kuttl-test/artifacts/
-crdDirs:
-  - kuttl-test/crddirs/
 testDirs:
   - kuttl-test/tests/
-#parallel: 4
+parallel: 1
+timeout: 180

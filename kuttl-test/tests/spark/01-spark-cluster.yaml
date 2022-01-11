@@ -38,3 +38,4 @@ spec:
         replicas: 1
         config:
           historyWebUiPort: 18081
+

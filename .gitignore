@@ -40,3 +40,5 @@ gen
 
 /kubeconfig
 spark-log.txt
+kuttl-test/artifacts
+kuttl-test/tests/spark/minimalSpark/bin

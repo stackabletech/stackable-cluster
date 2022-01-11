@@ -1,0 +1,5 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+commands:
+  - command: helm repo add stackable-dev https://repo.stackable.tech/repository/helm-dev
+  - command: helm upgrade spark-operator stackable-dev/spark-operator --version="0.5.0-nightly" --install
