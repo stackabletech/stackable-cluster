@@ -3,6 +3,7 @@ LABEL maintainer="Stackable GmbH"
 
 ARG GRADLE_VERSION=7.3.3
 ARG GRADLE_BASE_URL=https://services.gradle.org/distributions
+ARG GRADLE_SHA=b586e04868a22fd817c8971330fec37e298f3242eb85c374181b12d637f80302
 
 RUN apt update && \
     apt install -y curl unzip && \
@@ -10,6 +11,9 @@ RUN apt update && \
     \
     echo "Downloading gradle hash" && \
     curl -fsSL -o /tmp/gradle.zip ${GRADLE_BASE_URL}/gradle-${GRADLE_VERSION}-bin.zip && \
+    \
+    echo "Checking download hash" && \
+    echo "${GRADLE_SHA}  /tmp/gradle.zip" | sha256sum -c - && \
     \
     echo "Unziping gradle" && \
     unzip -d /usr/share/gradle /tmp/gradle.zip && \
@@ -33,8 +37,8 @@ RUN apt update && \
 #RUN ["/bin/bash", "-c", "/etc/profile.d/gradle.sh"]
 
 
-#WORKDIR /stackable
-#COPY /kuttl-test/tests/spark /stackable
+
+COPY /minimalSpark/* /stackable/minimalSpark/
 
 ENV GRADLE_VERSION 7.3.3
 ENV GRADLE_HOME /usr/bin/gradle
