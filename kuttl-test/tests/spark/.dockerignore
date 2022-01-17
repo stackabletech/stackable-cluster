@@ -5,3 +5,7 @@ README-secret.md
 **/*.class
 minimalSpark/build
 minimalSpark/generated
+gradlew
+gradlew.bat
+gradle
+.gradle

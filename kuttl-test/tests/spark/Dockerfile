@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:11
 LABEL maintainer="Stackable GmbH"
 
 ARG GRADLE_VERSION=7.3.3
@@ -23,22 +23,8 @@ RUN apt update && \
     ln -s /usr/share/gradle/gradle-${GRADLE_VERSION} /usr/bin/gradle
 
 
-#RUN mkdir /opt/gradle && \
-#    cp -pr gradle-*/* /opt/gradle
-#echo ${GRADLE_BASE_URL}"/gradle-"${GRADLE_VERSION}"-bin.zip" && \
-#ENV GRADLE_HOME=/opt/gradle/gradle-7.3.3
-#ENV PATH=$PATH:$GRADLE_HOME/bin
-
-
-    #export PATH=$PATH:/opt/gradle/gradle-7.3.3/bin
-    #echo "export PATH=/opt/gradle/bin:${PATH}" | tee /etc/profile.d/gradle.sh && \
-    #chmod +x /etc/profile.d/gradle.sh
-
-#RUN ["/bin/bash", "-c", "/etc/profile.d/gradle.sh"]
-
-
-
-COPY /minimalSpark/* /stackable/minimalSpark/
+COPY kuttl-test/tests/spark/minimalSpark/ /stackable/minimalSpark/
+COPY kuttl-test/tests/spark/settings.gradle /stackable/
 
 ENV GRADLE_VERSION 7.3.3
 ENV GRADLE_HOME /usr/bin/gradle
@@ -46,8 +32,10 @@ ENV GRADLE_USER_HOME /cache
 
 ENV PATH $PATH:$GRADLE_HOME/bin
 
-VOLUME $GRADLE_USER_HOME
+WORKDIR /stackable/
+#RUN gradle build
 
-#RUN gradle --version
+VOLUME /stackable/
 
-#CMD [""]
+#ENTRYPOINT ["/bin/sh"]
+CMD [""]
