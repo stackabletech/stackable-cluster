@@ -40,5 +40,8 @@ Install the following components for local tests:
 #Where do I start?
 
 1. Installing all the above tools
-2. Build a .jar file for the spark application (Java 11) `TODO: setup CI/CD pipeline` 
-3. From project root execute `kubectl kuttl test -v 3` `TODO: startup script`
+2. Execute the ```.startTests.sh```
+   * Build a .jar file for the spark application (Java 11)
+      * The gradle docker container (7.3.3 with jdk 11) will be pulled from docker.
+      * The build starts with the minimalSpark directory mounted to the gradle container
+   * Start kind cluster and execute tests
