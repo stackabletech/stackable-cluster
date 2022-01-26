@@ -2,8 +2,6 @@
 
 set -x
 
-SPARK_MASTER_IP=$(hostname -i | cut -d' ' -f2)
-
 /stackable/spark/bin/spark-submit \
   --class com.stackable.operator.minimal \
   --master spark://simple-master-default:7077 \
