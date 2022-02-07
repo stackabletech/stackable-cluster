@@ -11,6 +11,9 @@ application {
 
 //https://stackoverflow.com/questions/24724383/add-resources-config-files-to-your-jar-using-gradle
 
+tasks.jar() {
+    destinationDirectory = file('distribution')
+}
 
 repositories {
     mavenCentral()
