@@ -38,6 +38,8 @@ gen
 #!.idea
 #!.run
 
+.archiv
+
 /kubeconfig
 spark-log.txt
 kuttl-test/artifacts
