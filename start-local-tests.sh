@@ -2,12 +2,10 @@
 
 set -x
 
-REPO_DIR=$(dirname $0)
+docker run --rm -v $(pwd)/kuttl-test/tests/spark:/spark/minimalSpark:rw -w /spark/minimalSpark gradle:7.3.3-jdk11 gradle clean build
 
-echo ${REPO_DIR}
+./create_test_cluster.py --debug --kind --operator spark
 
-docker run --rm -v $REPO_DIR/kuttl-test/tests/spark:/spark/minimalSpark:rw -w /spark/minimalSpark gradle:7.3.3-jdk11 gradle clean build
-
-kubectl kuttl test --kind-config ./kind.yaml --kind-context stkbl-cntxt
+kubectl kuttl test -v 3
 
 

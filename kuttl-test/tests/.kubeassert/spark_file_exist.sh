@@ -12,10 +12,10 @@ function spark_file_exist {
     # Print assertion message
     logger::assert "File with name $1 should be on path."
     # Run some kubectl commands
-    export SPARK_MASTER_POD=$(kubectl get pods -o=name | grep master | sed "s/^.\{4\}//")
+    export SPARK_MASTER_POD=$(kubectl -n $NAMESPACE get pods -o=name | grep master | sed "s/^.\{4\}//")
     echo $SPARK_MASTER_POD
 
-    export SPARK_FILE=$(kubectl exec $SPARK_MASTER_POD -- ls /tmp/ | grep StackyMcStackfaceSaysHello | sed "s/^.\{0\}//" )
+    export SPARK_FILE=$(kubectl exec -n $NAMESPACE $SPARK_MASTER_POD -- ls /tmp/ | grep StackyMcStackfaceSaysHello | sed "s/^.\{0\}//" )
     echo $SPARK_FILE
 
     # Validate results
