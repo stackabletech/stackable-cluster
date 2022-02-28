@@ -29,4 +29,4 @@ kubectl -n $NAMESPACE cp ${RESOURCE_FILE} $SPARK_SLAVE_POD:/tmp
 
 #make submit executable
 kubectl exec -n $NAMESPACE --stdin $SPARK_MASTER_POD -- /bin/bash -c "chmod 700 /tmp/spark-submit.sh"
-kubectl exec -n $NAMESPACE $SPARK_MASTER_POD -- /bin/bash -x -v -c /tmp/spark-submit.sh &> spark-log.txt
+kubectl exec -n $NAMESPACE $SPARK_MASTER_POD -- /bin/bash -x -v -c "/tmp/spark-submit.sh ${NAMESPACE}" &> spark-log.txt
