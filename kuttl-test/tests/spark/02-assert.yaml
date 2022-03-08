@@ -1,13 +1,6 @@
----
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-timeout: 800
 metadata:
-  name: fkt-test
+  name: install-hdfs
 commands:
-  - script: ./kuttl-test/tests/spark/sparkPreparation.sh
-    timeout: 140 #https://github.com/kudobuilder/kuttl/issues/321
-    #TODO: check for better wait conditions or other kuttl options
-    #TODO: create a setup test and check status with field selector or wait for https://github.com/kudobuilder/kuttl/issues/294
-  - command: kubectl -n $NAMESPACE get pods -o wide
-  - command: ./kuttl-test/tests/kubectl-assert spark_file_exist StackyMcStackfaceSaysHello -v
+  - command: kubectl exec -n $NAMESPACE webhdfs-0 -- python /tmp/webhdfs.py ls

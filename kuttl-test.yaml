@@ -4,4 +4,4 @@ testDirs:
   - ./kuttl-test/tests/
 artifactsDir: ./kuttl-test/artifacts/
 startKIND: false
-#suppress: ["events"]
+suppress: ["events"]

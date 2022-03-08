@@ -7,5 +7,3 @@ docker run --rm -v $(pwd)/kuttl-test/tests/spark:/spark/minimalSpark:rw -w /spar
 ./create_test_cluster.py --debug --kind --operator spark
 
 kubectl kuttl test -v 3
-
-

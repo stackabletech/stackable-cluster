@@ -6,10 +6,10 @@ REPO_DIR=$(dirname $0)
 
 echo ${REPO_DIR}
 
-export SPARK_MASTER_POD=$(kubectl -n $NAMESPACE get pods -o=name | grep master | sed "s/^.\{4\}//")
+export SPARK_MASTER_POD=$(kubectl -n $NAMESPACE get pods -o=name | grep spark-master | sed "s/^.\{4\}//")
 echo $SPARK_MASTER_POD
 
-export SPARK_SLAVE_POD=$(kubectl -n $NAMESPACE get pods -o=name | grep slave | sed "s/^.\{4\}//")
+export SPARK_SLAVE_POD=$(kubectl -n $NAMESPACE get pods -o=name | grep spark-slave | sed "s/^.\{4\}//")
 echo $SPARK_SLAVE_POD
 
 #.jar needs to be distributed to pods
