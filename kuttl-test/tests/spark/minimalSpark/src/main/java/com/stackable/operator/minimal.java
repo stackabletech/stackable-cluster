@@ -9,7 +9,8 @@ public class minimal {
 
     public static void main(String[] args) {
 
-        String logFile = "/tmp/minimalSpark.txt";
+        //String logFile = "/tmp/minimalSpark.txt";
+        String logFile = "/testdata.txt";
 
         // create spark session
         SparkSession spark = SparkSession.builder().appName("minimal").getOrCreate();
@@ -22,7 +23,7 @@ public class minimal {
         logData.write()
                 .format("text")
                 .mode(SaveMode.Overwrite)
-                .save("/tmp/StackyMcStackfaceSaysHello/");
+                .save("/tmp/processedData.txt");
 
     }
 }
