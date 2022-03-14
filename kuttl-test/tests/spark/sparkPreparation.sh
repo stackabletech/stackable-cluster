@@ -28,6 +28,16 @@ RESOURCE_FILE="${REPO_DIR}/minimalSpark/src/main/resources/minimalSpark.txt"
 kubectl -n ${NAMESPACE} cp ${RESOURCE_FILE} $SPARK_MASTER_POD:/tmp
 kubectl -n ${NAMESPACE} cp ${RESOURCE_FILE} $SPARK_SLAVE_POD:/tmp
 
+#unset Env HADDOP_OPTS until Bug XY has been fixed
+export HDFS_NAMENODE_POD=hdfs-namenode-default-0
+kubectl exec -n ${NAMESPACE} --stdin $HDFS_NAMENODE_POD -- /bin/bash -c 'echo "$HADOOP_OPTS"'
+kubectl exec -n ${NAMESPACE} --stdin $HDFS_NAMENODE_POD -- /bin/bash -c 'unset HADOOP_OPTS'
+kubectl exec -n ${NAMESPACE} --stdin $HDFS_NAMENODE_POD -- /bin/bash -c 'echo "$HADOOP_OPTS"'
+
 #make submit executable
 kubectl exec -n ${NAMESPACE} --stdin $SPARK_MASTER_POD -- /bin/bash -c "chmod 700 /tmp/spark-submit.sh"
+
+#start spark job
 kubectl exec -n ${NAMESPACE} $SPARK_MASTER_POD -- /bin/bash -x -v -c "/tmp/spark-submit.sh ${NAMESPACE}" &> spark-log.txt
+
+
