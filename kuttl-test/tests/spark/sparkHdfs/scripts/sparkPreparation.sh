@@ -14,7 +14,7 @@ export SPARK_SLAVE_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep spark-s
 echo $SPARK_SLAVE_POD
 
 #.jar needs to be distributed to pods
-JAR_FILE="${REPO_DIR}/minimalSpark/distribution/minimalSpark.jar"
+JAR_FILE="${REPO_DIR}/distribution/sparkHdfs.jar"
 
 kubectl -n ${NAMESPACE} cp ${JAR_FILE} $SPARK_MASTER_POD:/tmp
 kubectl -n ${NAMESPACE} cp ${JAR_FILE} $SPARK_SLAVE_POD:/tmp
