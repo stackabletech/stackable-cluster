@@ -10,4 +10,4 @@ commands:
     #TODO: check for better wait conditions or other kuttl options
     #TODO: create a setup test and check status with field selector or wait for https://github.com/kudobuilder/kuttl/issues/294
   - command: kubectl -n $NAMESPACE get pods -o wide
-  - command: ./kuttl-test/tests/kubectl-assert spark_hdfs_file_exist processedData.txt -v
+  - command: ./kuttl-test/tests/kubectl-assert spark_file_exist StackyMcStackfaceSaysHello -v

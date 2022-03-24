@@ -8,9 +8,7 @@ import org.apache.spark.sql.SparkSession;
 public class minimal {
 
     public static void main(String[] args) {
-
-        //String logFile = "/tmp/minimalSpark.txt";
-        String logFile = "/testdata.txt";
+        String logFile = "/tmp/minimalSpark.txt";
 
         // create spark session
         SparkSession spark = SparkSession.builder().appName("minimal").getOrCreate();
@@ -23,7 +21,7 @@ public class minimal {
         logData.write()
                 .format("text")
                 .mode(SaveMode.Overwrite)
-                .save("/tmp/processedData.txt");
+                .save("/tmp/StackyMcStackfaceSaysHello/");
 
     }
 }
