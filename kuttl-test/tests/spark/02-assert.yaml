@@ -5,7 +5,7 @@ timeout: 800
 metadata:
   name: fkt-test
 commands:
-  - script: ./kuttl-test/tests/spark/minimalSpark/scripts/sparkPreparation.sh $NAMESPACE
+  - script: ./kuttl-test/tests/spark/minimalSpark/sparkPreparation.sh $NAMESPACE
   - command: ./kuttl-test/tests/kubectl-assert spark_file_exist StackyMcStackfaceSaysHello -v
-  - script: ./kuttl-test/tests/spark/sparkHdfs/scripts/sparkPreparation.sh $NAMESPACE
+  - script: ./kuttl-test/tests/spark/sparkHdfs/sparkPreparation.sh $NAMESPACE
   - command: ./kuttl-test/tests/kubectl-assert spark_hdfs_file_exist processedTestdata.txt -v

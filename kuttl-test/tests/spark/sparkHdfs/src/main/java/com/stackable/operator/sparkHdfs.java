@@ -7,7 +7,7 @@ import org.apache.spark.sql.SparkSession;
 public class sparkHdfs {
 
     public static void main(String[] args) {
-        String logFile = "/tmp/testdata.txt";
+        String logFile = "/testdata.txt";
 
         // create spark session
         SparkSession spark = SparkSession.builder().appName("sparkHdfs").getOrCreate();

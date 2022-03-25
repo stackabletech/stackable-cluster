@@ -2,7 +2,6 @@
 
 set -x
 
-NAMESPACE=${1}
 
 /stackable/spark/bin/spark-submit \
   --class com.stackable.operator.minimal \
