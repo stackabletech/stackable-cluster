@@ -36,8 +36,11 @@ kubectl exec -n ${NAMESPACE} hdfs-namenode-default-0 -- /bin/bash -x -v -c "unse
 # copy hbase-site.xml to spark master
 kubectl -n ${NAMESPACE} exec ${HBASE_POD} -- cat /stackable/hbase-2.4.9/conf/hbase-site.xml | kubectl -n ${NAMESPACE} exec -i ${SPARK_MASTER_POD} -- tee /stackable/spark/conf/hbase-site.xml
 
-# copy jars to hbase
-kubectl -n ${NAMESPACE} cp
+# copy jars to hbase see https://github.com/apache/hbase-connectors/tree/master/spark
+kubectl -n ${NAMESPACE} cp "${PROJECT_DIR}/src/main/resources/hbase-spark-protocol-shaded-1.0.1-SNAPSHOT.jar" ${HBASE_POD}:/stackable/hbase-2.4.9/conf/
+kubectl -n ${NAMESPACE} cp "${PROJECT_DIR}/src/main/resources/hbase-spark-1.0.1-SNAPSHOT.jar" ${HBASE_POD}:/stackable/hbase-2.4.9/conf/
+cd "${PROJECT_DIR}/src/main/resources/" && wget https://repo1.maven.org/maven2/org/scala-lang/scala-library/2.12.14/scala-library-2.12.14.jar
+kubectl -n ${NAMESPACE} cp "${PROJECT_DIR}/src/main/resources/scala-library-2.12.14.jar" ${HBASE_POD}:/stackable/hbase-2.4.9/conf/
 
 #start spark job
 kubectl exec -n ${NAMESPACE} $SPARK_MASTER_POD -- /bin/bash -x -v -c "/tmp/sparkHdfs-submit.sh" &> spark-log.txt

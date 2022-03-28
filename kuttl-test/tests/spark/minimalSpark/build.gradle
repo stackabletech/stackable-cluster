@@ -3,6 +3,7 @@ plugins {
     id "idea"
     id 'application'
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'maven-publish'
 }
 
 application {
@@ -21,6 +22,18 @@ repositories {
 
 dependencies {
     implementation 'org.apache.spark:spark-core_2.12:3.0.1'
-    compileOnly 'org.apache.spark:spark-sql_2.12:3.0.1'
-    compileOnly 'org.apache.spark:spark-mllib_2.12:3.0.1'
+    implementation 'org.apache.spark:spark-sql_2.12:3.0.1'
+    implementation 'org.apache.spark:spark-mllib_2.12:3.0.1'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.stackable.operator'
+            artifactId = 'minimalSpark'
+            version = '1.0'
+
+            from components.java
+        }
+    }
 }
