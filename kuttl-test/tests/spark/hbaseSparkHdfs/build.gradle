@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+    id "idea"
+    id 'application'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id 'maven-publish'
+}
+
+tasks.jar() {
+    destinationDirectory = file('distribution')
+}
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.spark:spark-core_2.12:3.0.1'
+    compileOnly 'org.apache.spark:spark-sql_2.12:3.0.1'
+    compileOnly 'org.apache.spark:spark-mllib_2.12:3.0.1'
+}
