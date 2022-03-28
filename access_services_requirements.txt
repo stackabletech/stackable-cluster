@@ -1,0 +1,2 @@
+kubernetes==22.6.0 # We had to downgrade because of https://github.com/kubernetes-client/python/issues/1733
+tabulate==0.8.9

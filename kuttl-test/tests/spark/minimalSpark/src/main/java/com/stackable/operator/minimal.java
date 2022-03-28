@@ -8,7 +8,6 @@ import org.apache.spark.sql.SparkSession;
 public class minimal {
 
     public static void main(String[] args) {
-
         String logFile = "/tmp/minimalSpark.txt";
 
         // create spark session

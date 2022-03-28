@@ -5,9 +5,6 @@ timeout: 800
 metadata:
   name: fkt-test
 commands:
-  - script: ./kuttl-test/tests/spark/sparkPreparation.sh
-    timeout: 140 #https://github.com/kudobuilder/kuttl/issues/321
-    #TODO: check for better wait conditions or other kuttl options
-    #TODO: create a setup test and check status with field selector or wait for https://github.com/kudobuilder/kuttl/issues/294
+  - script: ./kuttl-test/tests/spark/sparkPreparation.sh $NAMESPACE
   - command: kubectl -n $NAMESPACE get pods -o wide
   - command: ./kuttl-test/tests/kubectl-assert spark_file_exist StackyMcStackfaceSaysHello -v
