@@ -11,4 +11,4 @@ set -x
   --num-executors 2 \
   --executor-memory 1g \
   --verbose \
-  /tmp/sparkHdfs.jar
+  /tmp/sparkHdfs-1.0.jar

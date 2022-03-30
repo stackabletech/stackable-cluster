@@ -10,4 +10,4 @@ set -x
   --num-executors 2 \
   --executor-memory 1g \
   --verbose \
-  /tmp/minimalSpark.jar
+  /tmp/sparkMinimal-1.0.jar
