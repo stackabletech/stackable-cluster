@@ -34,6 +34,9 @@ gen
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
+#maven target dir
+*/target/
+
 # whitelist runConfigurations
 #!.idea
 #!.run
@@ -42,5 +45,5 @@ gen
 
 /kubeconfig
 spark-log.txt
-kuttl-test/artifacts
-kuttl-test/tests/spark/minimalSpark/bin
+tests/artifacts
+tests/tests/spark/minimalSpark/bin
