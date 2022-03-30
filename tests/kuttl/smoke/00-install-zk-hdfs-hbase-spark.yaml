@@ -1,3 +1,8 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+metadata:
+  name: install-zk-hdfs-hbase-spark
+timeout: 180
 ---
 apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperCluster
@@ -69,31 +74,6 @@ spec:
             kubernetes.io/os: linux
         replicas: 1
 ---
-apiVersion: hbase.stackable.tech/v1alpha1
-kind: HbaseCluster
-metadata:
-  name: hbase
-spec:
-  version: 2.4.9
-  config:
-    hdfsConfigMapName: hdfs-namenode-default
-    zookeeperConfigMapName: znode
-    hbaseManagesZk: false
-    hbaseClusterDistributed: true
-    hbaseRootdir: hdfs://hdfs/hbase
-  masters:
-    roleGroups:
-      default:
-        replicas: 1
-  regionServers:
-    roleGroups:
-      default:
-        replicas: 1
-  restServers:
-    roleGroups:
-      default:
-        replicas: 1
----
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkCluster
 metadata:
@@ -146,3 +126,28 @@ spec:
           image: python:3.10-slim
           stdin: true
           tty: true
+#---
+#apiVersion: hbase.stackable.tech/v1alpha1
+#kind: HbaseCluster
+#metadata:
+#  name: hbase
+#spec:
+#  version: 2.4.9
+#  config:
+#    hdfsConfigMapName: hdfs-namenode-default
+#    zookeeperConfigMapName: znode
+#    hbaseManagesZk: false
+#    hbaseClusterDistributed: true
+#    hbaseRootdir: hdfs://hdfs/hbase
+#  masters:
+#    roleGroups:
+#      default:
+#        replicas: 1
+#  regionServers:
+#    roleGroups:
+#      default:
+#        replicas: 1
+#  restServers:
+#    roleGroups:
+#      default:
+#        replicas: 1

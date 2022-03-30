@@ -1,0 +1,12 @@
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 800
+metadata:
+  name: fkt-test
+commands:
+  - command: pwd
+  - script: ./test-jobs-root/sparkMinimal/sparkPreparation.sh $NAMESPACE
+  - command: ./kuttl-test/kubectl-assert spark-file-exist StackyMcStackfaceSaysHello -v
+  - script: ./test-jobs-root/sparkHdfs/sparkPreparation.sh $NAMESPACE
+  - command: ./kuttl-test/kubectl-assert spark-hdfs-file-exist processedTestdata.txt -v

@@ -54,36 +54,6 @@ status:
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 metadata:
-  name: install-hbase
-timeout: 600
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: hbase-master-default
-status:
-  readyReplicas: 1
-  replicas: 1
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: hbase-regionserver-default
-status:
-  readyReplicas: 1
-  replicas: 1
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: hbase-restserver-default
-status:
-  readyReplicas: 1
-  replicas: 1
----
-apiVersion: kuttl.dev/v1beta1
-kind: TestAssert
-metadata:
   name: install-spark
 timeout: 300
 ---
@@ -124,3 +94,36 @@ metadata:
 status:
   readyReplicas: 1
   replicas: 1
+#---
+#apiVersion: kuttl.dev/v1beta1
+#kind: TestAssert
+#metadata:
+#  name: install-hbase
+#timeout: 600
+#---
+#apiVersion: apps/v1
+#kind: StatefulSet
+#metadata:
+#  name: hbase-master-default
+#status:
+#  readyReplicas: 1
+#  replicas: 1
+#timeout: 120
+#---
+#apiVersion: apps/v1
+#kind: StatefulSet
+#metadata:
+#  name: hbase-regionserver-default
+#status:
+#  readyReplicas: 1
+#  replicas: 1
+#timeout: 300
+#---
+#apiVersion: apps/v1
+#kind: StatefulSet
+#metadata:
+#  name: hbase-restserver-default
+#status:
+#  readyReplicas: 1
+#  replicas: 1
+#timeout: 300

@@ -1,4 +1,0 @@
-include 'minimalSpark'
-include 'sparkHdfs'
-//include 'hbaseSparkHdfs'
-
