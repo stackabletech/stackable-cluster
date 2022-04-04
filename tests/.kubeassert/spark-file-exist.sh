@@ -20,10 +20,10 @@ function spark_file_exist {
 
     # Validate results
     if [ "${SPARK_FILE}" == $1 ]; then
-      #Print success message
+
         logger::info "Found $SPARK_FILE in $SPARK_MASTER_POD"
     else
-       #Print failure message
+
         logger::fail  "$SPARK_FILE does not exist on $SPARK_MASTER_POD."
     fi
 }
