@@ -1,12 +1,12 @@
 #!/bin/bash
 
 ##
-# @Name: spark_hdfs_file_exist
+# @Name: spark-hdfs-file-exist
 # @Description: Assert specified file has been written by spark job
-# @Usage: kubectl assert spark_hdfs_file_exist
+# @Usage: kubectl assert spark-hdfs-file-exist
 ##
 
-function spark_hdfs_file_exist {
+function spark-hdfs-file-exist {
     # Validate input arguments
     [[ -z $1 ]] && logger::error "You must specify a fully qualified file name '<file-name>.<type>'" && exit 1
     # Print assertion message

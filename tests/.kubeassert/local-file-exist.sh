@@ -1,12 +1,12 @@
 #!/bin/bash
 
 ##
-# @Name: spark_file_exist
+# @Name: local-file-exist
 # @Description: Assert specified file has been written by spark job
 # @Usage: kubectl assert spark_file_exist
 ##
 
-function spark_file_exist {
+function local-file-exist {
     # Validate input arguments
     [[ -z $1 ]] && logger::error "You must specify a fully qualified file name '<file-name>.<type>'" && exit 1
     # Print assertion message

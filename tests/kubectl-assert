@@ -29,7 +29,7 @@ NORMAL="\033[0m"
 RED="\033[0;31m"
 
 IS_FAILED=0
-WORKDIR=./kuttl-test/tests/.kubeassert
+WORKDIR="$PWD"/tests/.kubeassert
 mkdir -p $WORKDIR
 
 OP_VAL_OPTIONS_HELP=(
