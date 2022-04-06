@@ -17,7 +17,7 @@ function spark-hdfs-file-exist {
     # export NAME_NODE_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep hdfs-namenode-default-0 | sed "s/^.\{4\}//")
     export NAME_NODE_POD=hdfs-namenode-default-0
 
-    kubectl exec -n $NAMESPACE $NAME_NODE_POD -- /bin/bash -c "unset HADOOP_OPTS && bin/hdfs dfs -test -e /tmp/$1"
+    kubectl exec -n $NAMESPACE $NAME_NODE_POD -- bin/hdfs dfs -test -e /tmp/$1
 
     # Validate results
     if [ $? -eq 0 ]; then
