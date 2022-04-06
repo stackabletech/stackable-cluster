@@ -15,7 +15,7 @@ function local-file-exist {
     export SPARK_MASTER_POD=$(kubectl -n $NAMESPACE get pods -o=name | grep spark-master | sed "s/^.\{4\}//")
     echo $SPARK_MASTER_POD
 
-    export SPARK_FILE=$(kubectl exec -n $NAMESPACE $SPARK_MASTER_POD -- ls /tmp/ | grep StackyMcStackfaceSaysHello | sed "s/^.\{0\}//" )
+    export SPARK_FILE=$(kubectl exec -n $NAMESPACE $SPARK_MASTER_POD -- ls /tmp/stacky | grep _SUCCESS | sed "s/^.\{0\}//" )
     echo $SPARK_FILE
 
     # Validate results

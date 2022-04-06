@@ -25,7 +25,7 @@ SUBMIT_SCRIPT="${PROJECT_DIR}/spark-submit.sh"
 kubectl -n ${NAMESPACE} cp ${SUBMIT_SCRIPT} $SPARK_MASTER_POD:/tmp
 
 #copy resource file to master
-RESOURCE_FILE="${PROJECT_DIR}/src/main/resources/minimalSpark.txt"
+RESOURCE_FILE="${PROJECT_DIR}/src/main/resources/minimalSpark.csv"
 kubectl -n ${NAMESPACE} cp ${RESOURCE_FILE} $SPARK_MASTER_POD:/tmp
 kubectl -n ${NAMESPACE} cp ${RESOURCE_FILE} $SPARK_SLAVE_POD:/tmp
 

@@ -26,9 +26,6 @@ kubectl -n ${NAMESPACE} cp ${SUBMIT_SCRIPT} $SPARK_MASTER_POD:/tmp
 #make submit executable
 kubectl exec -n ${NAMESPACE} --stdin $SPARK_MASTER_POD -- /bin/bash -c "chmod 700 /tmp/sparkHdfs-submit.sh"
 
-#temp command until https://github.com/stackabletech/hdfs-operator/pull/148 is deployed
-#kubectl exec -n ${NAMESPACE} hdfs-namenode-default-0 -- /bin/bash -x -v -c "unset HADOOP_OPTS"
-
 #start spark job
 kubectl exec -n ${NAMESPACE} $SPARK_MASTER_POD -- /bin/bash -x -v -c "/tmp/sparkHdfs-submit.sh" &> spark-log.txt
 

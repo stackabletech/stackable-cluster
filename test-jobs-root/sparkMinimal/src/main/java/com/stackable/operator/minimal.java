@@ -1,27 +1,26 @@
 package com.stackable.operator;
 
-
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 
 public class minimal {
 
     public static void main(String[] args) {
-        String logFile = "/tmp/minimalSpark.txt";
 
         // create spark session
         SparkSession spark = SparkSession.builder().appName("minimal").getOrCreate();
 
         // read some file
-        Dataset<String> logData = spark.read().textFile(logFile).cache();
+        Dataset<Row> logData = spark.read().option("header", "False").option("delimiter", ";").csv("/tmp/minimalSpark.csv").cache();
 
         // print and save data
         logData.show(false);
-        logData.write()
-                .format("text")
+        logData.coalesce(1).write()
                 .mode(SaveMode.Overwrite)
-                .save("/tmp/StackyMcStackfaceSaysHello/");
+                .csv("/tmp/stacky");
 
+        spark.stop();
     }
 }
