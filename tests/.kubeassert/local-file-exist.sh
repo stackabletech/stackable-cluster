@@ -20,10 +20,8 @@ function local-file-exist {
 
     # Validate results
     if [ "${SPARK_FILE}" == $1 ]; then
-
         logger::info "Found $SPARK_FILE in $SPARK_MASTER_POD"
     else
-
         logger::fail  "$SPARK_FILE does not exist on $SPARK_MASTER_POD."
     fi
 }
