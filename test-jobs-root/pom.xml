@@ -10,9 +10,8 @@
     <version>1.0</version>
 
     <modules>
-        <module>sparkHdfs</module>
-        <module>sparkMinimal</module>
-        <!--        <module>sparkMinimal</module>-->
+        <module>spark-hdfs</module>
+        <module>spark-standalone</module>
     </modules>
 
     <properties>

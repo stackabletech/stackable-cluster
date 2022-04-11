@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sparkHdfs</artifactId>
+    <artifactId>spark-hdfs</artifactId>
 
     <dependencies>
         <dependency>
