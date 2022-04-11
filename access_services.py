@@ -64,7 +64,9 @@ def check_args() -> Namespace:
     parser.add_argument('--all-services', action='store_true',
                         help='Forward all services regardles of the name or the exposed ports')
     parser.add_argument('--dont-use-port-forward', '-d', action='store_true',
-                        help='Dont use "kubectl port-forward", instead return the NodeIP and NodePort. This may cause problems as many services dont have the nodePorts attribute or services having multiple endpoints')
+                        help='Dont use "kubectl port-forward", instead return the NodeIP and NodePort. This may cause problems as many services dont have the nodePorts attribute, services having multiple endpoints or kubernetes nodes having multiple InternalIPs or ExternalIPs (in this case we pick a random IP of that list)')
+    parser.add_argument('--use-internal-node-ip', action='store_true',
+                        help='Used in combination with --dont-use-port-forward. When set it prefers a nodes InternalIP over the ExternalIP')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='In case of using port-forward show stdout output of "kubectl port-forward" command')
     return parser.parse_args()
@@ -79,18 +81,7 @@ def main():
     config.load_kube_config()
     namespace = args.namespace or config.list_kube_config_contexts()[1]['context'].get("namespace", "default")
     K8S = client.CoreV1Api()
-
-    for node in K8S.list_node().items:
-        node_name = node.metadata.name
-        node_ip = None
-        for address in node.status.addresses:
-            if address.type in ('InternalIP', 'ExternalIP'):
-                node_ip = address.address
-                break
-        if node_ip is None:
-            raise Exception(f"Could not find a valid InternalIP or ExternalIP for node {node_name}")
-
-        K8S_NODE_IPS[node_name] = node_ip
+    calculate_k8s_node_ips(args)
 
     if args.all_namespaces:
         services = K8S.list_service_for_all_namespaces()
@@ -119,6 +110,29 @@ def main():
     for process in PROCESSES:
         process.wait()
 
+
+def calculate_k8s_node_ips(args):
+    """Loops over the available k8s nodes and extracts the NodeIP information"""
+    for node in K8S.list_node().items:
+        node_name = node.metadata.name
+        internal_node_ip = None
+        external_node_ip = None
+
+        for address in node.status.addresses:
+            if address.type == 'InternalIP':
+                internal_node_ip = address.address
+            elif address.type == 'ExternalIP':
+                external_node_ip = address.address
+
+        if args.use_internal_node_ip:
+            node_ip = internal_node_ip or external_node_ip
+        else:
+            node_ip = external_node_ip or internal_node_ip
+
+        if node_ip is None:
+            raise Exception(f"Could not find a valid InternalIP or ExternalIP for node {node_name}")
+
+        K8S_NODE_IPS[node_name] = node_ip
 
 def shall_expose_service(service_name, service_port_name) -> bool:
     """Should the particular port of the services be exposed?"""
@@ -160,17 +174,18 @@ def forward_port(service_namespace, service_name, service_port, service_port_nam
 def calculate_node_address(service_namespace, service_name, service_port, service_port_name, service_node_port):
     """Calculate the NodeIP and NodePort combination so that the service can be accessed directly without a port-forward"""
     endpoint = K8S.read_namespaced_endpoints(namespace=service_namespace, name=service_name)
-    node_name = endpoint.subsets[0].addresses[0].node_name
-    node_ip = K8S_NODE_IPS[node_name]
+    if endpoint.subsets is not None and len(endpoint.subsets) > 0:
+        node_name = endpoint.subsets[0].addresses[0].node_name
+        node_ip = K8S_NODE_IPS[node_name]
 
-    SERVICES.append([
-        service_namespace,
-        service_name,
-        service_port,
-        service_port_name,
-        f"http://{node_ip}:{service_node_port}",
-        get_extra_info(service_namespace, service_name),
-    ])
+        SERVICES.append([
+            service_namespace,
+            service_name,
+            service_port,
+            service_port_name,
+            f"http://{node_ip}:{service_node_port}",
+            get_extra_info(service_namespace, service_name),
+        ])
 
 
 def get_extra_info(service_namespace, service_name) -> str:

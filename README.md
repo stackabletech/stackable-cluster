@@ -34,7 +34,7 @@ Install the following components for local tests:
 * [KIND](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) 
 * [Krew](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
 * [KUTTL](https://kuttl.dev/docs/cli.html)
-* [Gradle](https://gradle.org/install/)
+* [Maven](https://maven.apache.org/install.html)
 * [(KubeAssert)](https://morningspace.github.io/kubeassert/docs/#/getting-started) currently saved in the project. Could be a krew plugin
   
 #Where do I start?

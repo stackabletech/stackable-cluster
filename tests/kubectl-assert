@@ -1,0 +1,813 @@
+#!/bin/bash
+
+# MIT License
+# 
+# Copyright (c) 2021 MorningSpace
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+VERSION="0.2.0"
+
+CYAN="\033[0;36m"
+GREEN="\033[0;32m"
+NORMAL="\033[0m"
+RED="\033[0;31m"
+
+IS_FAILED=0
+WORKDIR="$PWD"/tests/.kubeassert
+mkdir -p $WORKDIR
+
+OP_VAL_OPTIONS_HELP=(
+  "-eq, -lt, -gt, -ge, -le: Check if the actual value is equal to, less than, greater than, no less than, or no greater than expected value."
+)
+SELECT_OPTIONS_HELP=(
+  "-A, --all-namespaces: If present, list the requested object(s) across all namespaces. Namespace in current context is ignored even if specified with --namespace."
+  "    --field-selector='': Selector (field query) to filter on, supports '=', '==', and '!='. The server only supports a limited number of field queries per type."
+  "-l, --selector='': Selector (label query) to filter on, supports '=', '==', and '!='."
+  "-n, --namespace='': If present, the namespace scope for this CLI request."
+)
+GLOBAL_OPTIONS_HELP=(
+  "-h, --help: Print the help information."
+  "-v, --verbose: Enable the verbose log."
+  "-V, --version: Print the version information."
+)
+
+# Load custom assertions
+for file in `ls $WORKDIR/*.sh 2>/dev/null`; do . $file; done
+
+function join {
+  printf "$1"; shift
+  printf "%s" "${@/#/,}"
+}
+
+function kubectl {
+  [[ $ARG_VERBOSE == 1 ]] && logger::info "kubectl $@" >&2
+  command kubectl $@ > $WORKDIR/result.txt && ( [[ $ARG_VERBOSE == 1 ]] && cat $WORKDIR/result.txt || return 0 )
+}
+
+function logger::info {
+  echo -e "${CYAN}INFO   ${NORMAL}$@" >&2
+}
+
+function logger::error {
+  echo -e "${RED}ERROR  ${NORMAL}$@" >&2
+}
+
+function logger::assert {
+  echo -e "${CYAN}ASSERT ${NORMAL}$@" >&2
+}
+
+function logger::fail {
+  echo -e "${CYAN}ASSERT ${RED}FAIL${NORMAL} $@" >&2
+  IS_FAILED=1
+}
+
+function logger::pass {
+  [[ $IS_FAILED == 0 ]] && echo -e "${CYAN}ASSERT ${GREEN}PASS${NORMAL}"
+}
+
+function parse_common_args {
+  ARG_HELP=''
+  ARG_VERBOSE=''
+  ARG_VERSION=''
+  POSITIONAL=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h|--help)
+      ARG_HELP=1; shift ;;
+    -v|--verbose)
+      ARG_VERBOSE=1; shift ;;
+    -V|--version)
+      ARG_VERSION=1; shift ;;
+    *)
+      POSITIONAL+=("$1"); shift ;;
+    esac
+  done
+}
+
+function parse_select_args {
+  NAMESPACE=''
+  ARG_NAMESPACE=''
+  LABEL_SELECTORS=()
+  ARG_LABEL_SELECTORS=()
+  FIELD_SELECTORS=()
+  ARG_FIELD_SELECTORS=()
+  POSITIONAL=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -n|--namespace)
+      NAMESPACE="$2 namespace"
+      ARG_NAMESPACE="$1 $2"; shift; shift ;;
+    -A|--all-namespaces)
+      NAMESPACE="all namespaces"
+      ARG_NAMESPACE="$1";    shift ;;
+    -l|--selector)
+      LABEL_SELECTORS+=("$2")
+      ARG_LABEL_SELECTORS+=("$1 $2");  shift; shift ;;
+    --field-selector)
+      FIELD_SELECTORS+=("$2")
+      ARG_FIELD_SELECTORS+=("$1 $2");  shift; shift ;;
+    *)
+      POSITIONAL+=("$1"); shift ;;
+    esac
+  done
+}
+
+function parse_op_val_args {
+  OPERATOR=""
+  EXPECTED_VAL=""
+  POSITIONAL=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    "-eq")
+      OPERATOR="equal to"
+      EXPECTED_VAL=$2; shift; shift ;;
+    "-lt")
+      OPERATOR="less than"
+      EXPECTED_VAL=$2; shift; shift ;;
+    "-gt")
+      OPERATOR="greater than"
+      EXPECTED_VAL=$2; shift; shift ;;
+    "-ge")
+      OPERATOR="no less than"
+      EXPECTED_VAL=$2; shift; shift ;;
+    "-le")
+      OPERATOR="no greater than"
+      EXPECTED_VAL=$2; shift; shift ;;
+    *)
+      POSITIONAL+=("$1"); shift ;;
+    esac
+  done
+
+  # verify input
+  [[ -z $OPERATOR || -z $EXPECTED_VAL ]] && logger::error "You must specify an operator and an expected value." && exit 1
+}
+
+function parse_resource_args {
+  RESOURCE=$1
+  [[ -n $2 ]] && RESOURCE="$1 $2"
+
+  # verify input
+  [[ -z $RESOURCE ]] && logger::error "You must specify the type of resource to get." && exit 1
+
+  RESOURCE_FULLNAME="$RESOURCE"
+  [[ $1 != *s ]] && [[ -z $2 ]] && RESOURCE_FULLNAME="$RESOURCE(s)"
+
+  [[ -n ${LABEL_SELECTORS[@]} && -z ${FIELD_SELECTORS[@]} ]] && 
+    RESOURCE_FULLNAME+=" matching label criteria '`join ${LABEL_SELECTORS[@]}`'"
+  [[ -z ${LABEL_SELECTORS[@]} && -n ${FIELD_SELECTORS[@]} ]] && 
+    RESOURCE_FULLNAME+=" matching field criteria '`join ${FIELD_SELECTORS[@]}`'"
+  [[ -n ${LABEL_SELECTORS[@]} && -n ${FIELD_SELECTORS[@]} ]] && 
+    RESOURCE_FULLNAME+=" matching label criteria '`join ${LABEL_SELECTORS[@]}`' and field criteria '`join ${FIELD_SELECTORS[@]}`'"
+  }
+
+function parse_resource_row {
+  if [[ $NAMESPACE == "all namespaces" ]]; then
+    ROW_NAMESPACE=$1
+    ROW_NAME=$2
+    ROW_TOTAL_CONTAINERS=${3#*/}
+    ROW_READY_CONTAINERS=${3%/*}
+    ROW_STATUS=$4
+    ROW_RESTARTS=$5
+  else
+    ROW_NAMESPACE=$NAMESPACE
+    ROW_NAME=$1
+    ROW_TOTAL_CONTAINERS=${2#*/}
+    ROW_READY_CONTAINERS=${2%/*}
+    ROW_STATUS=$3
+    ROW_RESTARTS=$4
+  fi
+}
+
+function parse_enhanced_selector {
+  CUSTOM_COLUMNS=(
+    NAME:.metadata.name
+    NAMESPACE:.metadata.namespace
+  )
+  OPERATORS=()
+  EXPECTED_VALS=()
+
+  local field_selector
+  local selectors selector
+  local field value
+  local column_num=0
+
+  for field_selector in "${FIELD_SELECTORS[@]}"; do
+    IFS=',' read -r -a selectors <<< "$field_selector"
+    for selector in ${selectors[@]}; do
+      # support = operator
+      if [[ $selector =~ ^[^=~\!]+=[^=~\!]+ ]]; then
+        field="${selector%=*}"
+        value="${selector#*=}"
+        OPERATORS+=("equal to")
+      # support == operator
+      elif [[ $selector =~ ^[^=~\!]+==[^=~\!]+ ]]; then
+        field="${selector%==*}"
+        value="${selector#*==}"
+        OPERATORS+=("equal to")
+      # support != operator
+      elif [[ $selector =~ ^[^=~\!]+!=[^=~\!]+ ]]; then
+        field="${selector%!=*}"
+        value="${selector#*!=}"
+        OPERATORS+=("not equal to")
+      # support =~ operator
+      elif [[ $selector =~ ^[^=~\!]+=~[^=~\!]+ ]]; then
+        field="${selector%=~*}"
+        value="${selector#*=~}"
+        OPERATORS+=("match")
+      else
+        logger::error "$selector is not a known field selector." && exit 1
+      fi
+
+      ! [[ $field =~ ^\..+ ]] && field=".$field"
+
+      CUSTOM_COLUMNS+=("COL$column_num:$field")
+      EXPECTED_VALS+=("$value")
+
+      (( column_num++ ))
+    done
+  done
+}
+
+function parse_resource_rows {
+  local line
+  local line_num=0
+  ROWS=()
+
+  while IFS= read -r line; do
+    (( line_num++ ))
+    (( line_num == 1 )) && ROWS+=("$line") && continue
+
+    local parts=($line)
+    local found=1
+    for i in "${!EXPECTED_VALS[@]}"; do
+      (( j = i + 2 ))
+
+      case "${OPERATORS[$i]}" in
+      "equal to")
+        [[ ${parts[$j]} != ${EXPECTED_VALS[$i]} ]] && found=0 ;;
+      "not equal to")
+        [[ ${parts[$j]} == ${EXPECTED_VALS[$i]} ]] && found=0 ;;
+      "match")
+        [[ ! ${parts[$j]} =~ ${EXPECTED_VALS[$i]} ]] && found=0 ;;
+      esac
+    done
+    
+    [[ $found == 1 ]] && ROWS+=("$line")
+  done < $WORKDIR/result.txt
+}
+
+function list_assertions {
+  DEFAULT_ASSERTIONS=(`cat $0 | grep '^#[[:space:]]*@Name:' | sed -n 's/^#[[:space:]]*@Name://p'`)
+
+  echo "KubeAssert - the kubectl plugin to assert Kubernetes resources."
+  echo
+  echo " Find more information at: https://morningspace.github.io/kubeassert/docs/"
+  echo
+
+  echo "Supported assertions:"
+  # default ones
+  list_assertions_in $0
+  # custom ones
+  for file in `ls $WORKDIR/*.sh 2>/dev/null`; do
+    list_assertions_in "$file"
+  done
+
+  echo
+  echo "Use \"kubectl assert <assertion> --help\" for more information about a given assertion."
+}
+
+function list_assertions_in {
+  local assertions=(`cat $1 | grep '^#[[:space:]]*@Name:' | sed -n 's/^#[[:space:]]*@Name://p'`)
+
+  for name in "${assertions[@]}"; do
+    # skip custom assertion when found as default one
+    [[ $1 != $0 && ' '${DEFAULT_ASSERTIONS[@]}' ' =~ [[:space:]]+$name[[:space:]]+ ]] && continue
+    local comment="`sed -n -e "/^#[[:space:]]*@Name:[[:space:]]*$name$/,/^##$/p" $1 | sed -e '1d;$d'`"
+    local description="`echo "$comment" | grep '^#[[:space:]]*@Description:[[:space:]]*' | sed -n 's/^#[[:space:]]*@Description:[[:space:]]*//p'`"
+    printf "  %-36s %s\n" "$name" "$description"
+  done
+}
+
+function show_assertion_help {
+  for file in $0 `ls $WORKDIR/*.sh 2>/dev/null`; do
+    local assertions=(`cat $file | grep '^#[[:space:]]*@Name:' | sed -n 's/^#[[:space:]]*@Name://p'`)
+    if [[ ' '${assertions[@]}' ' =~ [[:space:]]+$1[[:space:]]+ ]]; then
+      show_assertion_help_in $file $1
+      break
+    fi
+  done
+}
+
+function show_assertion_help_in {
+  local name="$2"
+  local comment="`sed -n -e "/^#[[:space:]]*@Name:[[:space:]]*$name$/,/^##$/p" $1 | sed -e '1d;$d'`"
+  local description="`echo "$comment" | grep '^#[[:space:]]*@Description:[[:space:]]*' | sed -n 's/^#[[:space:]]*@Description:[[:space:]]*//p'`"
+  local usage="`echo "$comment" | grep '^#[[:space:]]*@Usage:[[:space:]]*' | sed -n 's/^#[[:space:]]*@Usage:[[:space:]]*//p'`"
+  local options=()
+  local examples=()
+  local parsing
+
+  while IFS= read -r line; do
+    [[ $line =~ ^#[[:space:]]*@Options:[[:space:]]*$ ]] && parsing=Options && continue
+    [[ $line =~ ^#[[:space:]]*@Examples:[[:space:]]*$ ]] && parsing=Examples && continue
+
+    if [[ $parsing == Options ]] && [[ ! $line =~ ^#$ ]]; then
+      if [[ $line =~ '${OP_VAL_OPTIONS}' ]]; then
+        options+=("${OP_VAL_OPTIONS_HELP[@]}")
+      elif [[ $line =~ '${SELECT_OPTIONS}' ]]; then
+        options+=("${SELECT_OPTIONS_HELP[@]}")
+      elif [[ $line =~ '${GLOBAL_OPTIONS}' ]]; then
+        options+=("${GLOBAL_OPTIONS_HELP[@]}")
+      else
+        options+=("`echo $line | sed -n 's/^#[[:space:]]*//p'`")
+      fi
+    fi
+    
+    if [[ $parsing == Examples ]] && [[ ! $line =~ ^#$ ]]; then
+      examples+=("`echo $line | sed -n 's/^#[[:space:]]*//p'`")
+    fi
+  done <<< "$comment"
+
+  [[ -n $description ]] && echo "$description" || echo "$name"
+  [[ -n $usage ]] && echo && echo "Usage: $usage"
+
+  if [[ -n ${options[@]} ]]; then
+    echo; echo "Options:"
+    for option in "${options[@]}"; do echo "  $option"; done
+  fi
+
+  if [[ -n ${examples[@]} ]]; then
+    echo; echo "Examples:"
+    for example in "${examples[@]}"; do echo "  $example"; done
+  fi
+}
+
+function run_assertion {
+  parse_common_args $@
+
+  local what=${POSITIONAL[0]}
+  if [[ -n $what ]]; then
+    if type $what &>/dev/null ; then
+      if [[ $ARG_HELP == 1 ]]; then
+        show_assertion_help $what
+      else
+        set -- ${POSITIONAL[@]}
+        $what ${@:2}
+        logger::pass
+      fi
+    else
+      logger::error 'Unknown assertion "'$what'".' && exit 1
+    fi
+  else
+    [[ $ARG_VERSION == 1 ]] && echo "kubectl-assert version $VERSION" || list_assertions
+  fi
+}
+
+##
+# @Name: exist
+# @Description: Assert resource should exist.
+# @Usage: kubectl assert exist (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [options]
+# @Options:
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert resources exist in current namespace.
+#   kubectl assert exist pods
+#   # To assert resources exist in specified namespace.
+#   kubectl assert exist replicasets -n default
+#   # To assert specified resource exists.
+#   kubectl assert exist deployment echo -n default
+#   # To assert resources with specified label exist.
+#   kubectl assert exist pods -l 'app=echo' -n default
+#   # To assert resources with specified field selector exist.
+#   kubectl assert exist pods --field-selector 'status.phase=Running' -n default
+#   # To assert resources with specified label and field selector exist.
+#   kubectl assert exist pods -l 'app=echo' --field-selector 'status.phase=Running' -n default
+#   # To assert resources with multiple specified lables and field selectors exist in some namespaces.
+#   kubectl assert exist deployment,pod -l 'app=echo,component=echo' --field-selector 'metadata.namespace==default' --all-namespaces
+##
+function exist {
+  parse_select_args $@
+
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "$RESOURCE_FULLNAME should exist."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} ${ARG_FIELD_SELECTORS[@]} $ARG_NAMESPACE -o name; then
+    local list=(`cat $WORKDIR/result.txt`)
+    local num=${#list[@]}
+    if (( num == 0 )); then
+      logger::fail "Resource(s) not found."
+    else
+      logger::info "Found $num resource(s)."
+      cat $WORKDIR/result.txt
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: not-exist
+# @Description: Assert resource should not exist.
+# @Usage: kubectl assert not-exist (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [options]
+# @Options:
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert resources not exist in current namespace.
+#   kubectl assert not-exist pods
+#   # To assert resources not exist in specified namespace.
+#   kubectl assert not-exist statefulsets -n default
+#   # To assert specified resource not exist.
+#   kubectl assert not-exist deployment echo -n default
+#   # To assert resources with specified label not exist.
+#   kubectl assert not-exist pods -l 'app=echo' -n default
+#   # To assert resources with specified field selector not exist.
+#   kubectl assert not-exist pods --field-selector 'status.phase=Error' -n default
+#   # To assert resources with specified label and field selector not exist.
+#   kubectl assert not-exist pods -l 'app=echo' --field-selector 'status.phase=Error' -n default
+#   # To assert resources with multiple specified lables and field selectors not exist in any namespace.
+#   kubectl assert not-exist deployments,pods -l 'app=echo,component=echo' --field-selector 'metadata.namespace==default' --all-namespaces
+##
+function not-exist {
+  parse_select_args $@
+
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "$RESOURCE_FULLNAME should not exist."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} ${ARG_FIELD_SELECTORS[@]} $ARG_NAMESPACE -o name; then
+    local list=(`cat $WORKDIR/result.txt`)
+    local num=${#list[@]}
+    if (( num == 0 )); then
+      logger::info "Resource(s) not found."
+    else
+      logger::fail "Found $num resources(s)."
+      cat $WORKDIR/result.txt
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: exist-enhanced
+# @Description: Assert resource should exist using enhanced field selector.
+# @Usage: kubectl assert exist-enhanced (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [options]
+# @Options:
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert pods in running status exist in current namespace.
+#   kubectl assert exist-enhanced pods --field-selector status.phase=Running
+#   # To assert pods with specified label in running status exist.
+#   kubectl assert exist-enhanced pods --field-selector metadata.labels.app=echo,status.phase=Running
+#   # To assert pods being deleted exist in some namespaces.
+#   kubectl assert exist-enhanced pods --field-selector metadata.deletionTimestamp!='<none>' --all-namespaces
+#   # To assert pods being deleted keeping running exist in some namespaces.
+#   kubectl assert exist-enhanced pods --field-selector metadata.deletionTimestamp!='<none>',status.phase==Running --all-namespaces
+#   # To assert deployments have specified replicas ready.
+#   kubectl assert exist-enhanced deployments --field-selector status.readyReplicas=1 -n default
+#   kubectl assert exist-enhanced deployments --field-selector status.readyReplicas=1 --field-selector metadata.namespace=default --all-namespaces
+#   # To assert deployments with specified label have specified replicas ready.
+#   kubectl assert exist-enhanced deployments --field-selector metadata.labels.app=echo,status.readyReplicas=1
+#   # To assert service accounts with specified secret exist using regex.
+#   kubectl assert exist-enhanced serviceaccounts --field-selector secrets[*].name=~my-secret -n default
+#   # To assert MyResources with specified status exist using regex.
+#   kubectl assert exist-enhanced MyResources --field-selector status.conditions[*].type=~Deployed -n default
+#   # To assert MyResources with their names in a specified list exist using regex.
+#   kubectl assert exist-enhanced MyResource --field-selector metadata.name=~'foo.*|bar.*|baz.*' -n default
+##
+function exist-enhanced {
+  parse_select_args $@
+  parse_enhanced_selector
+
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "$RESOURCE_FULLNAME should exist."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} $ARG_NAMESPACE -o custom-columns=`join ${CUSTOM_COLUMNS[@]}`; then
+    parse_resource_rows
+
+    if [ ${#ROWS[@]} -le 1 ]; then
+      logger::fail "Resource(s) not found."
+    else
+      logger::info "Found $(( ${#ROWS[@]} - 1 )) resource(s)."
+      for line in "${ROWS[@]}"; do
+        echo "$line"
+      done
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: not-exist-enhanced
+# @Description: Assert resource should not exist using enhanced field selector.
+# @Usage: kubectl assert not-exist-enhanced (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [options]
+# @Options:
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert pods in error status not exist in current namespace.
+#   kubectl assert not-exist-enhanced pods --field-selector status.phase=Error
+#   # To assert pods with specified label in error status not exist.
+#   kubectl assert not-exist-enhanced pods --field-selector metadata.labels.app=echo,status.phase=Error
+#   # To assert pods being deleted not exist in any namespace.
+#   kubectl assert not-exist-enhanced pods --field-selector metadata.deletionTimestamp!='<none>' --all-namespaces
+#   # To assert pods being deleted keeping running not exist in some namespaces.
+#   kubectl assert not-exist-enhanced pods --field-selector metadata.deletionTimestamp!='<none>',status.phase==Running --all-namespaces
+#   # To assert deployments have replicas not ready.
+#   kubectl assert not-exist-enhanced deployments --field-selector status.readyReplicas=0 -n default
+#   kubectl assert not-exist-enhanced deployments --field-selector status.readyReplicas=0 --field-selector metadata.namespace=default --all-namespaces
+#   # To assert deployments with specified label have replicas not ready.
+#   kubectl assert not-exist-enhanced deployments --field-selector metadata.labels.app=echo,status.readyReplicas=0
+#   # To assert namespace keeps terminating not exist.
+#   kubectl assert not-exist-enhanced namespace --field-selector metadata.deletetionTimestamp!='<none>',spec.finalizers[*]!='<none>'
+##
+function not-exist-enhanced {
+  parse_select_args $@
+  parse_enhanced_selector
+
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "$RESOURCE_FULLNAME should not exist."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} $ARG_NAMESPACE -o custom-columns=`join ${CUSTOM_COLUMNS[@]}`; then
+    parse_resource_rows
+
+    if [ ${#ROWS[@]} -le 1 ]; then
+      logger::info "Resource(s) not found."
+    else
+      logger::fail "Found $(( ${#ROWS[@]} - 1 )) resource(s)."
+      for line in "${ROWS[@]}"; do
+        echo "$line"
+      done
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: num
+# @Description: Assert the number of resource should match specified criteria.
+# @Usage: kubectl assert num (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [options] (-eq|-lt|-gt|-ge|-le VALUE)
+# @Options:
+#   ${OP_VAL_OPTIONS}
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert number of pods in specified namespace equal to specified value.
+#   kubectl assert num pods -n default -eq 10
+#   # To assert number of pods in specified namespace less than specified value.
+#   kubectl assert num pods -n default -lt 11
+#   # To assert number of pods with specified label in specified namespace no more than specified value.
+#   kubectl assert num pods -l "app=echo" -n default -le 3
+#   # To assert number of specified pod greater than specified value.
+#   kubectl assert num pod echo -n default -gt 0
+##
+function num {
+  parse_select_args $@
+
+  set -- ${POSITIONAL[@]}
+  parse_op_val_args $@
+
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "The number of $RESOURCE_FULLNAME should be $OPERATOR $EXPECTED_VAL."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} ${ARG_FIELD_SELECTORS[@]} $ARG_NAMESPACE -o name; then
+    local list=(`cat $WORKDIR/result.txt`)
+    local num=${#list[@]}
+    case "$OPERATOR" in
+    "equal to")
+      (( num != EXPECTED_VAL )) && IS_FAILED=1 ;;
+    "less than")
+      (( num >= EXPECTED_VAL )) && IS_FAILED=1 ;;
+    "greater than")
+      (( num <= EXPECTED_VAL )) && IS_FAILED=1 ;;
+    "no less than")
+      (( num <  EXPECTED_VAL )) && IS_FAILED=1 ;;
+    "no greater than")
+      (( num >  EXPECTED_VAL )) && IS_FAILED=1 ;;
+    esac    
+
+    [[ $IS_FAILED != 0 ]] && logger::fail "The actual number of resource(s) is $num."
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: pod-ready
+# @Description: Assert pod should be ready.
+# @Usage: kubectl assert pod-ready [options]
+# @Options:
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert pods ready in specified namespace.
+#   kubectl assert pod-ready -n default
+#   # To assert pods ready in all namespaces.
+#   kubectl assert pod-ready --all-namespaces
+##
+function pod-ready {
+  parse_select_args $@
+
+  POSITIONAL=(pod ${POSITIONAL[@]})
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "$RESOURCE_FULLNAME should be ready."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} ${ARG_FIELD_SELECTORS[@]} $ARG_NAMESPACE; then
+    local line
+    local line_num=0
+    local lines=()
+
+    while IFS= read -r line; do
+      (( line_num++ ))
+      (( line_num == 1 )) && lines+=("$line") && continue
+
+      parse_resource_row $line
+
+      if (( $ROW_READY_CONTAINERS == $ROW_TOTAL_CONTAINERS )); then
+        [[ $ROW_STATUS != Completed && $ROW_STATUS != Running ]] && lines+=("$line")
+      else
+        [[ $ROW_STATUS != Completed ]] && lines+=("$line")
+      fi
+    done < $WORKDIR/result.txt
+
+    if [ ${#lines[@]} -gt 1 ]; then
+      logger::fail "Found $(( ${#lines[@]} - 1 )) resource(s) not ready."
+      for line in "${lines[@]}"; do
+        echo "$line"
+      done
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: pod-not-terminating
+# @Description: Assert pod should not keep terminating.
+# @Usage: kubectl assert pod-not-terminating [options]
+# @Options:
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert no pod terminating in specified namespace.
+#   kubectl assert pod-not-terminating -n default
+#   # To assert no pod terminating in any namespace.
+#   kubectl assert pod-not-terminating --all-namespaces
+##
+function pod-not-terminating {
+  parse_select_args $@
+
+  POSITIONAL=(pod ${POSITIONAL[@]})
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "$RESOURCE_FULLNAME should not be terminating."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} ${ARG_FIELD_SELECTORS[@]} $ARG_NAMESPACE; then
+    local line
+    local line_num=0
+    local lines=()
+
+    while IFS= read -r line; do
+      (( line_num++ ))
+      (( line_num == 1 )) && lines+=("$line") && continue
+
+      parse_resource_row $line
+
+      [[ $ROW_STATUS == Terminating ]] && lines+=("$line")
+    done < $WORKDIR/result.txt
+
+    if [ ${#lines[@]} -gt 1 ]; then
+      logger::fail "Found $(( ${#lines[@]} - 1 )) resource(s) terminating."
+      for line in "${lines[@]}"; do
+        echo "$line"
+      done
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: pod-restarts
+# @Description: Assert pod restarts should match specified criteria.
+# @Usage: kubectl assert pod-restarts [options] (-eq|-lt|-gt|-ge|-le VALUE)
+# @Options:
+#   ${OP_VAL_OPTIONS}
+#   ${SELECT_OPTIONS}
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert restarts of pods less than specified value.
+#   kubectl assert pod-restarts -n default -lt 10
+#   # To assert restarts of pods with specified label in specified namespace no more than specified value.
+#   kubectl assert pod-restarts -l 'app=echo' -n default -le 10
+#   # To assert restarts of pods no more than specified value in any namespace.
+#   kubectl assert pod-restarts --all-namespaces -lt 10
+##
+function pod-restarts {
+  parse_select_args $@
+
+  set -- ${POSITIONAL[@]}
+  parse_op_val_args $@
+
+  POSITIONAL=(pod ${POSITIONAL[@]})
+  set -- ${POSITIONAL[@]}
+  parse_resource_args $@
+
+  logger::assert "The restarts of $RESOURCE_FULLNAME should be $OPERATOR $EXPECTED_VAL."
+
+  if kubectl get $RESOURCE ${ARG_LABEL_SELECTORS[@]} ${ARG_FIELD_SELECTORS[@]} $ARG_NAMESPACE; then
+    local line
+    local line_num=0
+    local lines=()
+
+    while IFS= read -r line; do
+      (( line_num++ ))
+      (( line_num == 1 )) && lines+=("$line") && continue
+
+      parse_resource_row $line
+
+      case "$OPERATOR" in
+      "equal to")
+        (( ROW_RESTARTS != EXPECTED_VAL )) && lines+=("$line") ;;
+      "less than")
+        (( ROW_RESTARTS >= EXPECTED_VAL )) && lines+=("$line") ;;
+      "greater than")
+        (( ROW_RESTARTS <=  EXPECTED_VAL )) && lines+=("$line") ;;
+      "no less than")
+        (( ROW_RESTARTS < EXPECTED_VAL )) && lines+=("$line") ;;
+      "no greater than")
+        (( ROW_RESTARTS >  EXPECTED_VAL )) && lines+=("$line") ;;
+      esac    
+    done < $WORKDIR/result.txt
+
+    if [ ${#lines[@]} -gt 1 ]; then
+      logger::fail "Found $(( ${#lines[@]} - 1 )) resource(s) restarts not $OPERATOR $EXPECTED_VAL."
+      for line in "${lines[@]}"; do
+        echo "$line"
+      done
+    fi
+  else
+    logger::fail "Error getting resource(s)."
+  fi
+}
+
+##
+# @Name: apiservice-available
+# @Description: Assert apiservice should be available.
+# @Usage: kubectl assert apiservice-available [options]
+# @Options:
+#   ${GLOBAL_OPTIONS}
+# @Examples:
+#   # To assert apiservice available.
+#   kubectl assert apiservice-available
+##
+function apiservice-available {
+  logger::assert "apiservices should be available."
+
+  if kubectl get apiservices; then
+    if cat $WORKDIR/result.txt | grep -q False; then
+      logger::fail "Found apiservices not available."
+      cat $WORKDIR/result.txt | grep False
+    fi
+  else
+    logger::fail "Error getting apiservices."
+  fi
+}
+
+run_assertion "$@"

@@ -11,7 +11,7 @@ import sys
 import time
 from argparse import Namespace
 
-VALID_OPERATORS = ["airflow", "druid", "hbase", "hdfs", "hive", "kafka", "nifi", "opa", "secret", "spark", "superset", "trino", "zookeeper"]
+VALID_OPERATORS = ["airflow", "druid", "hbase", "hdfs", "hive", "kafka", "nifi", "opa", "secret", "spark", "spark-k8s", "superset", "trino", "zookeeper"]
 
 DEFAULT_KIND_CLUSTER_NAME = "integration-tests"
 
@@ -38,6 +38,7 @@ OPERATOR_TO_EXAMPLE_REPO = {
   # we do not need to provide the secret examples
   "secret": None,
   "spark": "https://raw.githubusercontent.com/stackabletech/spark-operator/main/examples/simple-spark-cluster.yaml",
+  "spark-k8s": None,   # TODO
   "superset": "https://raw.githubusercontent.com/stackabletech/superset-operator/main/examples/simple-superset-cluster.yaml",
   "trino": "https://raw.githubusercontent.com/stackabletech/trino-operator/main/examples/simple-trino-cluster.yaml",
   "zookeeper": "https://raw.githubusercontent.com/stackabletech/zookeeper-operator/main/examples/simple-zookeeper-cluster.yaml",
@@ -263,6 +264,7 @@ def install_dependencies(name: str):
     "nifi": install_dependencies_nifi,
     "opa": install_dependencies_opa,
     "superset": install_dependencies_superset,
+    "spark-k8s": install_dependencies_spark_k8s,
     "trino": install_dependencies_trino,
     "hdfs": install_dependencies_hdfs,
   }
@@ -313,6 +315,13 @@ def install_dependencies_superset():
     '--set', 'auth.database=superset'
   ]
   helper_install_helm_release("superset-postgresql", "postgresql", "bitnami", "https://charts.bitnami.com/bitnami", args)
+
+
+def install_dependencies_spark_k8s():
+  logging.info("Installing dependencies for Spark on Kubernetes")
+  # helper_install_minio()    # not needed anymore
+  # TODO potentially remove this function again
+  # TODO maybe remove the minio stuff altogether
 
 
 def install_dependencies_airflow():
