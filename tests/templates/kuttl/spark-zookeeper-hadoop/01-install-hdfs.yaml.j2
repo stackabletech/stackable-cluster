@@ -9,7 +9,7 @@ kind: HdfsCluster
 metadata:
   name: hdfs
 spec:
-  version: 3.2.2
+  version: {{ test_scenario['values']['hadoop'] }}
   zookeeperConfigMapName: znode
   dfsReplication: 1
   log4j: |-

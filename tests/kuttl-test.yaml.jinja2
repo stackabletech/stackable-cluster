@@ -1,6 +1,10 @@
+---
 apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
 testDirs:
-  - ./tests/kuttl
+  {% for testcase in testinput.tests %}
+  - ./tests/{{ testcase.name }}
+  {% endfor %}
+
 startKIND: false
 suppress: ["events"]
