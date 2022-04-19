@@ -2,9 +2,11 @@
 
 set -x
 
-#docker run -l "user=$(id -u)" --rm -v $(pwd)/test-jobs-root:/test-jobs-root -w /test-jobs-root maven:3.8.4-jdk-8 mvn clean install
+docker run -u $(id -u ${USER}):$(id -g ${USER}) \
+          --rm -v $(pwd)/test-jobs-root:/test-jobs-root \
+          -w /test-jobs-root maven:3.8.4-jdk-8 mvn clean install
 
-#./create_test_cluster.py --debug --kind --operator spark hbase zookeeper hdfs
+./create_test_cluster.py --debug --kind --operator spark hbase zookeeper hdfs
 
 
 # Register absolute paths to pass to Ansible so the location of the role is irrelevant
