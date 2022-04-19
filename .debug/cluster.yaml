@@ -13,6 +13,9 @@ spec:
   wireguard: false
   versions:
     spark-operator: "$SPARK_OPERATOR_VERSION"
+    hdfs-operator: "$HDFS_OPERATOR_VERSION"
+    zookeeper-operator: "$ZOOKEEPER_OPERATOR_VERSION"
+    hbase-operator: "$HBASE_OPERATOR_VERSION"
   nodes:
     main:
       numberOfNodes: 3

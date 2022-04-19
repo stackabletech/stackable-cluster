@@ -9,7 +9,7 @@ export REPO_DIR='/stackable-cluster'
 docker pull docker.stackable.tech/t2-testdriver
 
 # execute gradle build
-sh ../gradle-build.sh $HOST_WORKSPACE
+sh ./mvn-build.sh $HOST_WORKSPACE
 
 docker run --rm \
     --volume "$HOST_WORKSPACE/target/:/target/" \
