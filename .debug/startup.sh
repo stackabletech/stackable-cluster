@@ -9,12 +9,11 @@ export REPO_DIR='/stackable-cluster'
 docker pull docker.stackable.tech/t2-testdriver
 
 # execute gradle build
-sh ./mvn-build.sh $HOST_WORKSPACE
+#sh ./mvn-build.sh $HOST_WORKSPACE
 
 docker run --rm \
     --volume "$HOST_WORKSPACE/target/:/target/" \
-    --volume "$HOST_WORKSPACE/.ci/debug/cluster.yaml:/cluster.yaml" \
-    --volume "$HOST_WORKSPACE/.ci/debug/test.sh:/test.sh" \
+    --volume "$HOST_WORKSPACE/cluster.yaml:/cluster.yaml" \
     --volume "$HOST_WORKSPACE/kuttl-test.yaml:/kuttl-test.yaml" \
     --volume "$HOST_WORKSPACE/kuttl-test:/kuttl-test" \
     --env T2_TOKEN=$T2_TOKEN \

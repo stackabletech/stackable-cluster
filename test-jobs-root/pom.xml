@@ -12,6 +12,7 @@
     <modules>
         <module>spark-hdfs</module>
         <module>spark-standalone</module>
+        <module>hbase</module>
     </modules>
 
     <properties>
