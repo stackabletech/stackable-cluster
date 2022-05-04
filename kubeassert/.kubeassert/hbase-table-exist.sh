@@ -7,18 +7,22 @@
 ##
 
 function hbase-table-exist {
+    NAMESPACE=${1}
+    logger::info "NAMESPACE: $NAMESPACE"
+
     # Validate input arguments
-    [[ -z $1 ]] && logger::error "You must specify a fully qualified table name '<file-name>'" && exit 1
+    [[ -z $2 ]] && logger::error "You must specify a fully qualified table name '<file-name>'" && exit 1
 
-    logger::assert "Table with name $1 should exist."
+    export HBASE_INTERACTIVE_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep hbase-interactive | sed "s/^.\{4\}//")
+    logger::info "HBASE_INTERACTIVE_POD: $HBASE_INTERACTIVE_POD"
 
-    kubectl exec -n default simple-hbase-master-default-0 -- bash -c "echo \"export HBASE_MANAGES_ZK=false\" > /stackable/conf/hbase-env.sh && echo \"exists 'stackable'\" | bin/hbase shell -n"
-    status=$?
+    logger::assert "Table with name $2 should exist."
+    kubectl -n ${NAMESPACE} exec -t ${HBASE_INTERACTIVE_POD} -- /bin/bash -c "echo \"describe 'stackable'\" | /stackable/hbase/bin/hbase shell -n"
 
     # Validate results
     if [ $? -eq 0 ]; then
-        logger::info "The results exist $?. Therefore, found $1 in $HBASE_NODE_POD"
+        logger::info "The return code equals to $?. Therefore, found $1 in HBASE"
     else
-        logger::fail  "The results exist $?. Therefore, $1 does not exist on $HBASE_NODE_POD."
+        logger::fail  "The return code equals to $?. Therefore, $1 does not exist in HBASE."
     fi
 }

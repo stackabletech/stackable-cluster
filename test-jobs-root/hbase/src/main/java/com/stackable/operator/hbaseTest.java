@@ -1,13 +1,14 @@
 package com.stackable.operator;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-
 
 public class hbaseTest {
     private static final TableName TABLE_NAME = TableName.valueOf("stackable");
@@ -30,6 +31,15 @@ public class hbaseTest {
 
     public static void main(String[] args) throws IOException {
         Configuration config = HBaseConfiguration.create();
+        config.addResource(new Path("/etc/hbase/hbase-site.xml"));
+        config.writeXml(System.out);
+
+        try {
+            HBaseAdmin.available(config);
+        } catch (MasterNotRunningException e) {
+            System.out.println("HBase is not running." + e.getMessage());
+            return;
+        }
 
         try (Connection connection = ConnectionFactory.createConnection(config); Admin admin = connection.getAdmin()) {
             createTable(admin);

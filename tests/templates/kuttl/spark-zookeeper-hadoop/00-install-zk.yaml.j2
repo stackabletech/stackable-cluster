@@ -13,8 +13,15 @@ spec:
 apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
 metadata:
-  name: znode
+  name: hdfs-znode
 spec:
   clusterRef:
     name: zk
-
+---
+apiVersion: zookeeper.stackable.tech/v1alpha1
+kind: ZookeeperZnode
+metadata:
+  name: hbase-znode
+spec:
+  clusterRef:
+    name: zk
