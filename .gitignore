@@ -46,3 +46,4 @@ gen
 /kubeconfig
 spark-log.txt
 tests/artifacts
+result.txt
