@@ -14,7 +14,7 @@ export SPARK_SLAVE_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep spark-s
 echo $SPARK_SLAVE_POD
 
 #.jar needs to be distributed to pods
-JAR_FILE="${PROJECT_DIR}/target/spark-standalone-1.0.jar"
+JAR_FILE="${PROJECT_DIR}/spark-standalone-1.0.jar"
 echo $JAR_FILE
 
 kubectl -n ${NAMESPACE} cp ${JAR_FILE} $SPARK_MASTER_POD:/tmp
@@ -25,7 +25,7 @@ SUBMIT_SCRIPT="${PROJECT_DIR}/spark-submit.sh"
 kubectl -n ${NAMESPACE} cp ${SUBMIT_SCRIPT} $SPARK_MASTER_POD:/tmp
 
 #copy resource file to master
-RESOURCE_FILE="${PROJECT_DIR}/src/main/resources/minimalSpark.csv"
+RESOURCE_FILE="${PROJECT_DIR}/minimalSpark.csv"
 kubectl -n ${NAMESPACE} cp ${RESOURCE_FILE} $SPARK_MASTER_POD:/tmp
 kubectl -n ${NAMESPACE} cp ${RESOURCE_FILE} $SPARK_SLAVE_POD:/tmp
 

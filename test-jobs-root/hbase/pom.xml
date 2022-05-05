@@ -48,6 +48,7 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.2</version>
                 <configuration>
+                    <outputDirectory>.</outputDirectory>
                     <archive>
                         <index>true</index>
                         <manifest>

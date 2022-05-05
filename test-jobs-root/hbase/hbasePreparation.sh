@@ -11,7 +11,7 @@ export HBASE_INTERACTIVE_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep h
 echo $HBASE_INTERACTIVE_POD
 
 #.jar needs to be distributed to pod
-JAR_FILE="${PROJECT_DIR}/target/hbase-1.0.jar"
+JAR_FILE="${PROJECT_DIR}/hbase-1.0.jar"
 kubectl -n ${NAMESPACE} cp ${JAR_FILE} $HBASE_INTERACTIVE_POD:/tmp
 
 #start hbase job
