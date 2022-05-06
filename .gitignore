@@ -47,3 +47,4 @@ gen
 spark-log.txt
 tests/artifacts
 result.txt
+_work

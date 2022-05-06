@@ -7,5 +7,5 @@ set -x
 BASE_DIR=${@}
 
 docker run --rm -v "$BASE_DIR"/test-jobs-root:/test-jobs-root \
-           -w /test-jobs-root maven:3.8.4-jdk-8 mvn clean install
+           -w /test-jobs-root maven:3.8.5-jdk-8 mvn clean install
 exit

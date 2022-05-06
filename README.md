@@ -41,3 +41,16 @@ Install the following components for local tests:
 
 1. Installing all the above tools
 2. Execute the ```./start-local-tests.sh```
+
+#How to debug CI Pipeline?
+
+The CI Pipeline depends on T2 and runs on Jenkins.
+For debugging purposes we use the directory ```.interactive```
+1. Set your T2_Token created by Nikolaus ```export T2_TOKEN=<YOUR_TOKEN>```
+2. Go to ```.interactive``` and run ```.startup.sh```
+3. Open a new terminal session and list your running docker containers with ```docker ps```
+4. Log into you docker container with ```docker exec -it <YOUR_CONTAINER_NAME> bash```
+
+Now you are in a container which is next to the created k8 cluster defined in ```.interactive/cluster.yaml```
+From here you can execute all your kubectl commands. In the container you can find the ```.kubeconfig``` of the k8s cluster you are connected with.   
+   
