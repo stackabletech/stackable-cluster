@@ -5,7 +5,6 @@ set -x
 export HOST_WORKSPACE=$(pwd)
 export DOCKER_UID_GID="$(id -u):$(id -g)"
 export GIT_LOCAL_BRANCH="hbase-test"
-#export REPO_DIR='/stackable-cluster'
 
 docker pull docker.stackable.tech/t2-testdriver
 
@@ -31,5 +30,3 @@ docker run --rm \
     --env GIT_BRANCH=$GIT_LOCAL_BRANCH \
     --env INTERACTIVE_MODE=true \
     docker.stackable.tech/t2-testdriver
-
-#--volume "$HOST_WORKSPACE/../test-jobs-root:/test-jobs-root" \
