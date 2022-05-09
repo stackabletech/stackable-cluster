@@ -4,8 +4,8 @@ set -x
 
 #./create_test_cluster.py --debug --kind --operator zookeeper spark hbase hdfs
 
-#docker run --rm -v $(pwd)/test-jobs-root:/test-jobs-root \
-#          -w /test-jobs-root maven:3.8.5-jdk-8 mvn clean install
+docker run --rm -v $(pwd)/test-jobs-root:/test-jobs-root \
+          -w /test-jobs-root maven:3.8.5-jdk-8 mvn clean install
 
 
 # Register absolute paths to pass to Ansible so the location of the role is irrelevant
@@ -43,8 +43,10 @@ cp test-jobs-root/hbase/hbasePreparation.sh test-jobs-root/hbase/hbase-1.0.jar "
 # copy assert files to _work
 cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 
+exit 1
+
 # Run tests
 pushd tests/_work
-kubectl kuttl test -v 3 --skip-delete
+kubectl kuttl test -v 3
 popd
 
