@@ -2,12 +2,6 @@
 
 set -x
 
-#./create_test_cluster.py --debug --kind --operator zookeeper spark hbase hdfs
-
-docker run --rm -v $(pwd)/test-jobs-root:/test-jobs-root \
-          -w /test-jobs-root maven:3.8.5-jdk-8 mvn clean install
-
-
 # Register absolute paths to pass to Ansible so the location of the role is irrelevant
 # for the run
 TESTDIR="$(pwd)/tests"
@@ -32,7 +26,8 @@ echo '{}' | jq '{work_dir: $WORKDIR, test_dir: $TESTDIR, project_dir: $PROJECTDI
 ansible-playbook playbook.yaml --extra-vars "@${WORKDIR}/vars.json"
 popd
 
-# copy array few resources to the _work dir. This is the first but not final solution. May be create zip file and then move.
+# copy resources to the _work dir.
+# This is the first but not final solution. May be create zip file and then move.
 mkdir -p "$WORKDIR/test-jobs-root/spark-standalone"
 cp test-jobs-root/spark-standalone/spark-submit.sh test-jobs-root/spark-standalone/sparkPreparation.sh test-jobs-root/spark-standalone/spark-standalone-1.0.jar test-jobs-root/spark-standalone/src/main/resources/minimalSpark.csv "$WORKDIR/test-jobs-root/spark-standalone"
 mkdir -p "$WORKDIR/test-jobs-root/spark-hdfs"
@@ -43,7 +38,7 @@ cp test-jobs-root/hbase/hbasePreparation.sh test-jobs-root/hbase/hbase-1.0.jar "
 # copy assert files to _work
 cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 
-exit 1
+
 
 # Run tests
 pushd tests/_work

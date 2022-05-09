@@ -50,7 +50,9 @@ For debugging purposes we use the directory ```.interactive```
 2. Go to ```.interactive``` and run ```.startup.sh```
 3. Open a new terminal session and list your running docker containers with ```docker ps```
 4. Log into you docker container with ```docker exec -it <YOUR_CONTAINER_NAME> bash```
+5. In case you lose your connection you can restore it with ```stackable -i .cluster/key api-tunnel 6443```
 
 Now you are in a container which is next to the created k8 cluster defined in ```.interactive/cluster.yaml```
 From here you can execute all your kubectl commands. In the container you can find the ```.kubeconfig``` of the k8s cluster you are connected with.   
-   
+
+To tear down the k8s cluster execute the following ```touch /cluster_lock```    
