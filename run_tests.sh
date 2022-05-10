@@ -44,4 +44,6 @@ cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 pushd tests/_work
 kubectl kuttl test -v 3
 popd
-
+# Cleanup created dirs
+rm -rf tests/ansible/roles
+rm -rf "$WORKDIR"
