@@ -56,7 +56,7 @@ For debugging purposes we use the directory ```.interactive```
    2. Re-instate your ssh-tunnel ```stackable -i .cluster/key api-tunnel 6443```
    3. Check with ```kubectl get nodes``` to see if your tunnel works again
 
-Now you are in a container which is next to the created k8 cluster defined in ```.interactive/cluster.yaml```
+Now you are in a container which has access to the created k8 cluster defined in ```.interactive/cluster.yaml```
 From here you can execute all your kubectl commands. In the container you can find the ```.kubeconfig``` of the k8s cluster you are connected with.   
 
 To tear down the k8s cluster execute the following ```touch /cluster_lock```    
