@@ -1,9 +1,0 @@
-apiVersion: kuttl.dev/v1beta1
-kind: TestSuite
-testDirs:
-  - ./kuttl-test/tests/
-startKIND: false
-namespace: default
-artifactsDir: ./kuttl-test/artifacts/
-parallel: 1
-timeout: 180

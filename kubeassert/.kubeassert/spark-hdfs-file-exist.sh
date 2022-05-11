@@ -16,8 +16,8 @@ function spark-hdfs-file-exist {
 
     # Validate results
     if [ $? -eq 0 ]; then
-        logger::info "The results exist $?. Therefore, found $1 in $NAME_NODE_POD"
+        logger::info "The return code equals to $?. Therefore, found $1 in $NAME_NODE_POD"
     else
-        logger::fail  "The results exist $?. Therefore, $1 does not exist on $NAME_NODE_POD."
+        logger::fail  "The return code equals to $?. Therefore, $1 does not exist on $NAME_NODE_POD."
     fi
 }

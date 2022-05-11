@@ -1,0 +1,41 @@
+---
+apiVersion: hbase.stackable.tech/v1alpha1
+kind: HbaseCluster
+metadata:
+  name: fkt-test-hbase
+spec:
+  version: {{ test_scenario['values']['hbase'] }}
+  hdfsConfigMapName: hdfs-namenode-default
+  zookeeperConfigMapName: hbase-znode
+  config:
+    hbaseRootdir: /hbase
+  masters:
+    roleGroups:
+      default:
+        selector:
+          matchLabels:
+            kubernetes.io/os: linux
+        replicas: 1
+  regionServers:
+    roleGroups:
+      default:
+        selector:
+          matchLabels:
+            kubernetes.io/os: linux
+        replicas: 2
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hbase-interactive
+spec:
+  containers:
+    - name: run
+      image: docker.stackable.tech/stackable/hbase:2.4.11-stackable0
+      volumeMounts:
+        - name: config-volume
+          mountPath: /stackable/conf
+  volumes:
+    - name: config-volume
+      configMap:
+        name: fkt-test-hbase-master-default
