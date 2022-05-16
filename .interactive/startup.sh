@@ -27,6 +27,8 @@ docker run --rm \
     --env HDFS_OPERATOR_VERSION=NIGHTLY \
     --env ZOOKEEPER_OPERATOR_VERSION=NIGHTLY \
     --env HBASE_OPERATOR_VERSION=NIGHTLY \
+    --env SECRET_OPERATOR_VERSION=NIGHTLY \
+    --env COMMONS_OPERATOR_VERSION=NIGHTLY \
     --env GIT_BRANCH=$GIT_LOCAL_BRANCH \
     --env INTERACTIVE_MODE=true \
     docker.stackable.tech/t2-testdriver
