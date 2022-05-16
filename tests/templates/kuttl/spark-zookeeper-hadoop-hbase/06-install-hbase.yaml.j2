@@ -34,7 +34,7 @@ spec:
       image: docker.stackable.tech/stackable/hbase:2.4.11-stackable0
       volumeMounts:
         - name: config-volume
-          mountPath: /stackable/conf
+          mountPath: /stackable/conf/hbase
   volumes:
     - name: config-volume
       configMap:

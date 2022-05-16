@@ -2,13 +2,21 @@
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 metadata:
-  name: install-test-zk
+  name: install-zk
 timeout: 300
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: zk-server-default
+  name: zk-server-primary
+status:
+  readyReplicas: 2
+  replicas: 2
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zk-server-secondary
 status:
   readyReplicas: 1
   replicas: 1

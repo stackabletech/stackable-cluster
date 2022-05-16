@@ -2,7 +2,7 @@
 dimensions:
   - name: zookeeper
     values:
-      - 3.5.8
+      - 3.8.0
   - name: spark
     values:
       - 3.1.1
