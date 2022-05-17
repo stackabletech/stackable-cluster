@@ -31,7 +31,8 @@ public class hbaseTest {
 
     public static void main(String[] args) throws IOException {
         Configuration config = HBaseConfiguration.create();
-        config.addResource(new Path("/etc/hbase/hbase-site.xml"));
+        config.addResource(new Path("/stackable/conf/hbase/hbase-site.xml"));
+        config.addResource(new Path("/stackable/conf/hdfs/hdfs-site.xml"));
         config.writeXml(System.out);
 
         try {

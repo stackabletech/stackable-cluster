@@ -40,7 +40,7 @@ Install the following components for local tests:
 # Where do I start?
 
 1. Installing all the above tools
-2. Start your local environment with ```./setup_local_environment.sh```
+2. To set up your kind cluster and build the necessary .jars run ```./setup_local_environment.sh``` 
 3. Execute the ```./run-tests.sh``` for the actual tests
 
 # How to debug CI Pipeline?

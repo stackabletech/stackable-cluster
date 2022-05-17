@@ -33,9 +33,14 @@ spec:
     - name: run
       image: docker.stackable.tech/stackable/hbase:2.4.11-stackable0
       volumeMounts:
-        - name: config-volume
-          mountPath: /stackable/conf
+        - name: config-volume-hbase
+          mountPath: /stackable/conf/hbase
+        - name: config-volume-hdfs
+          mountPath: /stackable/conf/hdfs
   volumes:
-    - name: config-volume
+    - name: config-volume-hbase
       configMap:
         name: fkt-test-hbase-master-default
+    - name: config-volume-hdfs
+      configMap:
+        name: hdfs
