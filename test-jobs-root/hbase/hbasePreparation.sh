@@ -32,7 +32,7 @@ kubectl exec -n ${NAMESPACE} $HDFS_NAMENODE -- /bin/bash -x -v -c "bin/hdfs dfs 
 # core-site-path: /stackable/conf/hdfs/core-site.xml
 kubectl exec -n ${NAMESPACE} $HBASE_INTERACTIVE_POD -- /bin/bash -x -v -c "java -jar /tmp/hbase-1.0.jar \
                                                                           --targetTable stackable \
-                                                                          --input /tmp/testdata.txt \
+                                                                          --input /hbase/wine-dataset-small.txt \
                                                                           --hbaseSite /stackable/conf/hbase/hbase-site.xml \
                                                                           --hdfsSite  /stackable/conf/hdfs/hdfs-site.xml \
                                                                           --coreSite /stackable/conf/hdfs/core-site.xml \
