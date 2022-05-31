@@ -45,8 +45,8 @@ public class hbaseTest {
         //table.put();
     }
 
-    public static void readData(final Path path, Configuration configuration) throws IOException {
-        try{
+    public static void readData(final Path path, Configuration configuration) {
+        try {
 
             FileSystem fs = FileSystem.get(configuration);
             BufferedReader br=new BufferedReader(new InputStreamReader(fs.open(path)));
@@ -57,9 +57,10 @@ public class hbaseTest {
                 System.out.println(line);
                 line=br.readLine();
             }
-        }catch(Exception e){
-        }
-        return;
+          } catch (Exception e) {
+            LOGGER.info("*** Error Message ***: " + e.getMessage());
+            e.printStackTrace();
+            }
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -83,6 +84,7 @@ public class hbaseTest {
         config.addResource(new Path(hbaseSite));
         config.addResource(new Path(coreSite));
         config.addResource(new Path(hdfsSite));
+        config.set("fs.AbstractFileSystem.hdfs.impl", "org.apache.hadoop.fs.Hdfs");
         config.writeXml(System.out);
         config.set("hbase.table.name", targetTable);
 
