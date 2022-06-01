@@ -84,7 +84,9 @@ public class hbaseTest {
         config.addResource(new Path(hbaseSite));
         config.addResource(new Path(coreSite));
         config.addResource(new Path(hdfsSite));
-        config.set("fs.AbstractFileSystem.hdfs.impl", "org.apache.hadoop.fs.Hdfs");
+        // Tells the HbaseConfiguration class to use hdfs for filesystem
+        config.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+
         config.writeXml(System.out);
         config.set("hbase.table.name", targetTable);
 
