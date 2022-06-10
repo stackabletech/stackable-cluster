@@ -15,13 +15,16 @@ import org.apache.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class hbaseTest {
-    private static final TableName TABLE_NAME = TableName.valueOf("stackable");
-    private static final byte[] COLUMN_FAMILY_NAME = Bytes.toBytes("family");
-    private static final byte[] COLUMN = Bytes.toBytes("open_source");
-    private static final byte[] ROW_ID = Bytes.toBytes("row01");
+    private static final TableName TABLE_NAME = TableName.valueOf("wines");
+    private static final byte[] COLUMN_FAMILY_NAME = Bytes.toBytes("description");
+    private static final byte[] COLUMN = Bytes.toBytes("country");
 
     private static final String CMD_INPUT = "input";
     private static final String CMD_TARGET_TABLE = "targetTable";
@@ -33,34 +36,22 @@ public class hbaseTest {
 
     public static void createTable(final Admin admin) throws IOException {
         if(!admin.tableExists(TABLE_NAME)) {
+
             TableDescriptor desc = TableDescriptorBuilder.newBuilder(TABLE_NAME)
                     .setColumnFamily(ColumnFamilyDescriptorBuilder.of(COLUMN_FAMILY_NAME))
                     .build();
+
             admin.createTable(desc);
         }
     }
 
-    public static void putRow(final Table table) throws IOException {
-        table.put(new Put(ROW_ID).addColumn(COLUMN_FAMILY_NAME, COLUMN, Bytes.toBytes("Hello Stackable Data Platform")));
-        //table.put();
-    }
-
-    public static void readData(final Path path, Configuration configuration) {
-        try {
+    public static List<String> readData(final Path path, Configuration configuration) throws IOException {
 
             FileSystem fs = FileSystem.get(configuration);
-            BufferedReader br=new BufferedReader(new InputStreamReader(fs.open(path)));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(path)));
 
-            String line;
-            line=br.readLine();
-            while (line != null){
-                System.out.println(line);
-                line=br.readLine();
-            }
-          } catch (Exception e) {
-            LOGGER.info("*** Error Message ***: " + e.getMessage());
-            e.printStackTrace();
-            }
+            return reader.lines().collect(Collectors.toList());
+
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -87,7 +78,7 @@ public class hbaseTest {
         // Tells the HbaseConfiguration class to use hdfs for filesystem
         config.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
 
-        config.writeXml(System.out);
+        //config.writeXml(System.out);
         config.set("hbase.table.name", targetTable);
 
         try {
@@ -99,11 +90,24 @@ public class hbaseTest {
 
         try (Connection connection = ConnectionFactory.createConnection(config); Admin admin = connection.getAdmin()) {
             Path path = new Path(inputPath);
-            readData(path, config);
+            LOGGER.info("*** creating table ***: " + TABLE_NAME);
             createTable(admin);
 
             try(Table table = connection.getTable(TABLE_NAME)) {
-                putRow(table);
+                List<String> wine = readData(path, config);
+                LOGGER.info("*** Array Size ***: " + wine.size());
+
+                wine.stream()
+                        .forEach(e ->
+                        {
+                            try {
+                                String idOne = UUID.randomUUID().toString();
+                                table.put(new Put(idOne.getBytes(StandardCharsets.UTF_8))
+                                        .addColumn(COLUMN_FAMILY_NAME, COLUMN, e.getBytes(StandardCharsets.UTF_8)));
+                            } catch (IOException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
             }
         }
     }
