@@ -33,7 +33,7 @@ cp test-jobs-root/spark-standalone/spark-submit.sh test-jobs-root/spark-standalo
 mkdir -p "$WORKDIR/test-jobs-root/spark-hdfs"
 cp test-jobs-root/spark-hdfs/spark-hdfs-submit.sh test-jobs-root/spark-hdfs/sparkPreparation.sh test-jobs-root/spark-hdfs/spark-hdfs-1.0.jar "$WORKDIR/test-jobs-root/spark-hdfs"
 mkdir -p "$WORKDIR/test-jobs-root/hbase"
-cp test-jobs-root/hbase/hbasePreparation.sh test-jobs-root/hbase/hbase-1.0.jar test-jobs-root/hbase/wine-dataset-small.txt "$WORKDIR/test-jobs-root/hbase"
+cp test-jobs-root/hbase/hbasePreparation.sh test-jobs-root/hbase/hbase-1.0.jar test-jobs-root/hbase/wine-dataset-tiny.txt "$WORKDIR/test-jobs-root/hbase"
 
 # copy assert files to _work
 cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"

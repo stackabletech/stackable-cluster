@@ -20,8 +20,8 @@ JAR_FILE="${PROJECT_DIR}/hbase-1.0.jar"
 kubectl -n ${NAMESPACE} cp ${JAR_FILE} $HBASE_INTERACTIVE_POD:/tmp
 
 # upload test data to hdfs
-RESOURCE="${PROJECT_DIR}/wine-dataset-small.txt"
-RESOURCE_FILE="wine-dataset-small.txt"
+RESOURCE="${PROJECT_DIR}/wine-dataset-tiny.txt"
+RESOURCE_FILE="wine-dataset-tiny.txt"
 kubectl -n ${NAMESPACE} cp ${RESOURCE} $HDFS_NAMENODE:/tmp
 kubectl exec -n ${NAMESPACE} $HDFS_NAMENODE -- /bin/bash -x -v -c "bin/hdfs dfs -put /tmp/${RESOURCE_FILE} /hbase"
 

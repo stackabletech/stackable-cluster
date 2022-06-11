@@ -46,12 +46,10 @@ public class hbaseTest {
     }
 
     public static List<String> readData(final Path path, Configuration configuration) throws IOException {
-
             FileSystem fs = FileSystem.get(configuration);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(path)));
 
             return reader.lines().collect(Collectors.toList());
-
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -94,10 +92,10 @@ public class hbaseTest {
             createTable(admin);
 
             try(Table table = connection.getTable(TABLE_NAME)) {
-                List<String> wine = readData(path, config);
-                LOGGER.info("*** Array Size ***: " + wine.size());
+                List<String> list = readData(path, config);
+                LOGGER.info("*** Array Size ***: " + list.size());
 
-                wine.stream()
+                list.stream()
                         .forEach(e ->
                         {
                             try {
