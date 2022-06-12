@@ -20,6 +20,7 @@ function hbase-table-row-count {
     kubectl -n ${NAMESPACE} exec -t ${HBASE_INTERACTIVE_POD} -- /bin/bash -c "echo \"count 'stackable'\" | /stackable/hbase/bin/hbase shell -n"
 
     # Validate results
+    # Improvement: Handle meaningful returns. Not just return code. see https://github.com/stackabletech/stackable-cluster/issues/53
     if [ $? -eq 0 ]; then
         logger::info "The return code equals to $?. Therefore, found $1 in HBASE"
     else

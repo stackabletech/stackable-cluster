@@ -99,8 +99,8 @@ public class hbaseTest {
                         .forEach(e ->
                         {
                             try {
-                                String idOne = UUID.randomUUID().toString();
-                                table.put(new Put(idOne.getBytes(StandardCharsets.UTF_8))
+                                String rowId = UUID.randomUUID().toString();
+                                table.put(new Put(rowId.getBytes(StandardCharsets.UTF_8))
                                         .addColumn(COLUMN_FAMILY_NAME, COLUMN, e.getBytes(StandardCharsets.UTF_8)));
                             } catch (IOException ex) {
                                 throw new RuntimeException(ex);
