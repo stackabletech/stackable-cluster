@@ -13,9 +13,13 @@ dimensions:
     values:
       - 2.4.11-stackable0.6.0
 tests:
-  - name: spark-zookeeper-hadoop-hbase
+  - name: creation
     dimensions:
       - zookeeper
       - spark
       - hadoop
       - hbase
+  - name: fct-test-spark-hdfs
+    dimensions:
+      - hadoop
+      - spark

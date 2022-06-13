@@ -1,0 +1,9 @@
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+timeout: 800
+metadata:
+  name: fct-test-hbase
+commands:
+  - script: ./test-jobs-root/hbase/hbasePreparation.sh $NAMESPACE
+  - command: ./kubeassert/kubectl-assert hbase-table-row-count $NAMESPACE 5000 -v
