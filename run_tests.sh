@@ -42,10 +42,10 @@ cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 
 # Run tests
 pushd tests/_work
-kubectl kuttl test -v 3 --skip-delete --test creation
-export TEST_NAMESPACE=$(kubectl get namespace -o=name | sed -n -e 's/^.*\(kuttl-test\)/\1/p')
-kubectl kuttl test -v 3 --namespace ${TEST_NAMESPACE} --test fct-test-spark-hdfs
+kubectl kuttl test -v 3 --test fct-test-spark-standalone
+kubectl kuttl test -v 3 --test fct-test-spark-hdfs
+kubectl kuttl test -v 3 --test fct-test-hbase
 popd
 # Cleanup created dirs
-#rm -rf tests/ansible/roles
-#rm -rf "$WORKDIR"
+rm -rf tests/ansible/roles
+rm -rf "$WORKDIR"
