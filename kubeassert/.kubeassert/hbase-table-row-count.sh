@@ -17,7 +17,7 @@ function hbase-table-row-count {
     logger::info "HBASE_INTERACTIVE_POD: $HBASE_INTERACTIVE_POD"
 
     logger::assert "Table should contain $2 rows."
-    kubectl -n ${NAMESPACE} exec -t ${HBASE_INTERACTIVE_POD} -- /bin/bash -c "echo \"count 'wines'\" | /stackable/hbase/bin/hbase shell -n"
+    kubectl -n ${NAMESPACE} exec -t hbase-interactive -- /bin/bash -c "echo \"count 'wines'\" | /stackable/hbase/bin/hbase shell -n"
 
     # Validate results
     # Improvement: Handle meaningful returns. Not just return code. see https://github.com/stackabletech/stackable-cluster/issues/53
