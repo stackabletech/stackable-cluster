@@ -13,8 +13,6 @@ function hbase-table-row-count {
     # Validate input arguments
     [[ -z $2 ]] && logger::error "You must specify a count of expected rows" && exit 1
 
-    export HBASE_INTERACTIVE_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep hbase-interactive | sed "s/^.\{4\}//")
-    logger::info "HBASE_INTERACTIVE_POD: $HBASE_INTERACTIVE_POD"
 
     logger::assert "Table should contain $2 rows."
     kubectl -n ${NAMESPACE} exec -t hbase-interactive -- /bin/bash -c "echo \"count 'wines'\" | /stackable/hbase/bin/hbase shell -n"
