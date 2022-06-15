@@ -43,8 +43,26 @@ cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 # Run tests
 pushd tests/_work
 kubectl kuttl test -v 3 --test fct-test-spark-standalone
+if [ $? -eq 0 ]; then
+  echo "Test: fct-test-spark-standalone successful. Starting next test"
+  else
+    exit 1
+fi
+
 kubectl kuttl test -v 3 --test fct-test-spark-hdfs
-kubectl kuttl test -v 3 --test fct-test-hbase
+if [ $? -eq 0 ]; then
+  echo "Test: fct-test-spark-hdfs successful. Starting next test"
+  else
+    exit 1
+fi
+
+kubectl kuttl test -v 3 --test fct-test-hbase --skip-delete
+if [ $? -eq 0 ]; then
+  echo "Test: fct-test-hbase successful. Starting next test"
+  else
+    exit 1
+fi
+
 popd
 # Cleanup created dirs
 rm -rf tests/ansible/roles

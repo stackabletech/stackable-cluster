@@ -1,6 +1,6 @@
 ---
 apiVersion: kuttl.dev/v1beta1
-kind: TestStep
+kind: TestAssert
 timeout: 800
 metadata:
   name: fct-test-hbase

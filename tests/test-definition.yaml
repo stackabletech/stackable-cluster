@@ -2,7 +2,7 @@
 dimensions:
   - name: zookeeper
     values:
-      - 3.8.0-stackable0.7.0
+      - 3.8.0-stackable0.7.1
   - name: spark
     values:
       - 3.1.1-hadoop2.7-stackable0.5.0
