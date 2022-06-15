@@ -9,6 +9,9 @@ spec:
   zookeeperConfigMapName: hbase-znode
   config:
     hbaseRootdir: /hbase
+    env:
+    - name: HBASE_CONF_DIR
+      value: /stackable/conf/hbase
   masters:
     roleGroups:
       default:

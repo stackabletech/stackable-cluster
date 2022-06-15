@@ -2,10 +2,7 @@
 dimensions:
   - name: zookeeper
     values:
-      - 3.8.0-stackable0.7.0
-  - name: spark
-    values:
-      - 3.1.1-hadoop2.7-stackable0.5.0
+      - 3.8.0-stackable0.7.1
   - name: hadoop
     values:
       - 3.2.2-stackable0.5.0
@@ -13,9 +10,8 @@ dimensions:
     values:
       - 2.4.11-stackable0.6.0
 tests:
-  - name: spark-zookeeper-hadoop-hbase
+  - name: zookeeper-hadoop-hbase
     dimensions:
       - zookeeper
-      - spark
       - hadoop
       - hbase
