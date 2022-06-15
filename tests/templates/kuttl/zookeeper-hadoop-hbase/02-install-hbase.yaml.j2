@@ -9,9 +9,6 @@ spec:
   zookeeperConfigMapName: hbase-znode
   config:
     hbaseRootdir: /hbase
-    env:
-    - name: HBASE_CONF_DIR
-      value: /stackable/conf/hbase
   masters:
     roleGroups:
       default:
@@ -37,7 +34,7 @@ spec:
       image: docker.stackable.tech/stackable/hbase:2.4.11-stackable0
       volumeMounts:
         - name: config-volume-hbase
-          mountPath: /stackable/conf/hbase
+          mountPath: /stackable/conf/
         - name: config-volume-hdfs
           mountPath: /stackable/conf/hdfs
   volumes:
