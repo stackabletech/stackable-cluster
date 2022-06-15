@@ -13,11 +13,8 @@ function hbase-table-row-count {
     # Validate input arguments
     [[ -z $2 ]] && logger::error "You must specify a count of expected rows" && exit 1
 
-    export HBASE_MASTER_POD=$(kubectl -n ${NAMESPACE} get pods -o=name | grep hbase-master | sed "s/^.\{4\}//")
-    logger::info "HBASE_MASTER_POD: $HBASE_MASTER_POD"
-
     logger::assert "Table should contain $2 rows."
-    kubectl -n ${NAMESPACE} exec -t ${HBASE_MASTER_POD} -- /bin/bash -c "echo \"count 'w'\" | /stackable/hbase/bin/hbase shell -n"
+    kubectl -n ${NAMESPACE} exec -t hbase-interactive -- /bin/bash -c "echo \"count 'w'\" | /stackable/hbase/bin/hbase shell --conf /stackable/conf/hbase/ -n"
 
     # Validate results
     # Improvement: Handle meaningful returns. Not just return code. see https://github.com/stackabletech/stackable-cluster/issues/53
