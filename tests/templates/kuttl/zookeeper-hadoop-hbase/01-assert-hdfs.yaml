@@ -1,14 +1,21 @@
----
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 metadata:
-  name: install-spark
-timeout: 300
+  name: install-hdfs
+timeout: 600
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: spark-master-default
+  name: hdfs-namenode-default
+status:
+  readyReplicas: 2
+  replicas: 2
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hdfs-journalnode-default
 status:
   readyReplicas: 1
   replicas: 1
@@ -16,15 +23,7 @@ status:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: spark-slave-2core2g
-status:
-  readyReplicas: 1
-  replicas: 1
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: spark-history-server-default
+  name: hdfs-datanode-default
 status:
   readyReplicas: 1
   replicas: 1
