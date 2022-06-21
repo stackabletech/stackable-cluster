@@ -1,0 +1,9 @@
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 800
+metadata:
+  name: fct-test-spark-standalone
+commands:
+  - script: ./test-jobs-root/spark-standalone/sparkPreparation.sh $NAMESPACE
+  - command: ./kubeassert/kubectl-assert local-file-exist _SUCCESS -v

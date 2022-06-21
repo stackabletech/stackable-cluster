@@ -42,8 +42,15 @@ cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 
 # Run tests
 pushd tests/_work
-kubectl kuttl test -v 3 --skip-delete
+
+kubectl kuttl test -v 3 --test fct-test-hbase
+if [ $? -eq 0 ]; then
+  echo "Test: fct-test-hbase successful. Tests finished. Cleaning up next"
+  else
+    exit 1
+fi
+
 popd
 # Cleanup created dirs
-#rm -rf tests/ansible/roles
-#rm -rf "$WORKDIR"
+rm -rf tests/ansible/roles
+rm -rf "$WORKDIR"
