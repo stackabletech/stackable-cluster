@@ -39,7 +39,7 @@ cp test-jobs-root/hbase/hbasePreparation.sh test-jobs-root/hbase/hbase-1.0.jar t
 cp -R "$PROJECTDIR/kubeassert" "$WORKDIR"
 
 
-
+exit 1
 # Run tests
 pushd tests/_work
 

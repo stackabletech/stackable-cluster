@@ -31,16 +31,17 @@ Install the following components for local tests:
 * [Docker](https://docs.docker.com/get-docker/)
 * [Helm](https://helm.sh/docs/intro/install/)
 * [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
-* [KIND](https://kind.sigs.k8s.io/docs/user/quick-start/#installation) 
+* [KIND](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 * [Krew](https://krew.sigs.k8s.io/docs/user-guide/setup/install/)
 * [KUTTL](https://kuttl.dev/docs/cli.html)
 * [Maven](https://maven.apache.org/install.html)
 * [(KubeAssert)](https://morningspace.github.io/kubeassert/docs/#/getting-started) currently saved in the project. Could be a krew plugin
-  
+
 # Where do I start?
 
 1. Installing all the above tools
-2. To set up your kind cluster and build the necessary .jars run ```./setup_local_environment.sh``` 
+2. Start your local environment with ```./setup_local_environment.sh```
+2. To set up your kind cluster and build the necessary .jars run ```./setup_local_environment.sh```
 3. Execute the ```./run-tests.sh``` for the actual tests
 
 # How to debug CI Pipeline?
@@ -51,12 +52,12 @@ For debugging purposes we use the directory ```.interactive```
 2. Go to ```.interactive``` and run ```.startup.sh```
 3. Open a new terminal session and list your running docker containers with ```docker ps```
 4. Log into you docker container with ```docker exec -it <YOUR_CONTAINER_NAME> bash```
-5. In case you lose your connection you can restore it: 
-   1. check port in ```cat /root/.kube/config```
-   2. Re-instate your ssh-tunnel ```stackable -i .cluster/key api-tunnel 6443```
-   3. Check with ```kubectl get nodes``` to see if your tunnel works again
+5. In case you lose your connection you can restore it:
+    1. check port in ```cat /root/.kube/config```
+    2. Re-instate your ssh-tunnel ```stackable -i .cluster/key api-tunnel 6443```
+    3. Check with ```kubectl get nodes``` to see if your tunnel works again
 
 Now you are in a container which has access to the created k8 cluster defined in ```.interactive/cluster.yaml```
-From here you can execute all your kubectl commands. In the container you can find the ```.kubeconfig``` of the k8s cluster you are connected with.   
+From here you can execute all your kubectl commands. In the container you can find the ```.kubeconfig``` of the k8s cluster you are connected with.
 
-To tear down the k8s cluster execute the following ```touch /cluster_lock```    
+To tear down the k8s cluster execute the following ```touch /cluster_lock```

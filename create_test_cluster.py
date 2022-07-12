@@ -6,11 +6,11 @@ import logging
 import re
 import shutil
 import subprocess
+import sys
+import time
 from argparse import Namespace
 
 import requests
-import sys
-import time
 
 VALID_OPERATORS = ["airflow", "commons", "druid", "hbase", "hdfs", "hive", "kafka", "nifi", "opa", "secret", "spark", "spark-k8s", "superset", "trino", "zookeeper"]
 
@@ -139,6 +139,7 @@ def check_args() -> Namespace:
 def check_prerequisites():
     """ Checks whether Helm is installed"""
     helper_command_exists('helm')
+    check_python_version()
 
 
 def create_kind_cluster(name: str):
@@ -157,6 +158,12 @@ def create_kind_cluster(name: str):
     logging.info(f'Successfully created kind cluster [{name}]')
 
 
+def check_python_version():
+    if sys.version_info < (3, 7):
+        print("This script requires at least Python 3.7 to work correctly, please update your Python version!")
+        sys.exit(1)
+
+
 def check_kubernetes_available():
     """ Checks if Kubernetes is available, this is a naive approach but better than nothing """
     logging.info("Checking if Kubernetes is available")
@@ -166,7 +173,6 @@ def check_kubernetes_available():
 
 def install_stackable_operator(name: str, version: str = None):
     """ This installs a Stackable Operator release in Helm.
-
     It makes sure that the proper repository is installed and install either a specific version or the latest development version
     """
     install_dependencies(name)
@@ -190,7 +196,6 @@ def install_stackable_operator(name: str, version: str = None):
 
 def install_prometheus():
     """This installs the Prometheus Operator in Helm
-
     It makes sure that the proper repository is installed and deploys a generic ServiceMonitor service
     """
     helper_add_helm_repo(HELM_PROMETHEUS_REPO_NAME, HELM_PROMETHEUS_REPO_URL)
@@ -234,9 +239,7 @@ def helper_check_docker_running():
 
 def helper_add_helm_repo(name: str, url: str) -> str:
     """Adds Helm repository if it does not exist yet (it looks for a repository with the same URL, not name).
-
     An `update` command will also be run in either case.
-
     :return: The name of the repository, might differ from the passed name if it did already exist
     """
     logging.debug(f"Checking whether Helm repository [{name}] already exists")
@@ -312,13 +315,14 @@ def install_dependencies_opa():
 def install_dependencies_superset():
     logging.info("Installing dependencies for Superset")
     install_stackable_operator("commons")
-    args = [
+    install_stackable_operator("secret")
+    postgresql_args = [
         '--version', '11.0.0',
         '--set', 'auth.username=superset',
         '--set', 'auth.password=superset',
         '--set', 'auth.database=superset'
     ]
-    helper_install_helm_release("superset-postgresql", "postgresql", "bitnami", "https://charts.bitnami.com/bitnami", args)
+    helper_install_helm_release("superset-postgresql", "postgresql", "bitnami", "https://charts.bitnami.com/bitnami", postgresql_args)
 
 
 def install_dependencies_spark_k8s():
@@ -424,7 +428,6 @@ def helper_install_helm_release(name: str, chart_name: str, repo_name: str = Non
 
 def helper_find_helm_release(name: str, chart_name: str) -> dict:
     """ This tries to find a Helm release with an _exact_ name like the passed in parameter OR with a chart that _contains_ the passed in chart name.
-
     The returned object is a dict with these fields in Helm 3.7 (or None if not found): name, namespace, revision, updated, status, chart, app_version
     """
     logging.debug(f"Looking for helm release with chart or name of [{name}]")
@@ -444,7 +447,6 @@ def helper_command_exists(command: str):
 
 def helper_execute(args, stdin: str = None) -> str:
     """ This will execute the passed in program and exit the program if it failed.
-
     In case of a failure or if debug is enabled it will also print the stdout of the program, stderr is always streamed.
     In case of success it will return the stdout.
     """
@@ -500,8 +502,8 @@ def operator_from_input(input: str) -> OperatorVersion:
     raise argparse.ArgumentTypeError(f"Operator name {input} is invalid")
 
 def main() -> int:
-    args = check_args()
     check_prerequisites()
+    args = check_args()
     if args.kind:
         create_kind_cluster(args.kind)
     check_kubernetes_available()
